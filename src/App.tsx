@@ -3,7 +3,7 @@ import type { Component } from "solid-js"
 const App: Component = () => {
   return (
     <div class="flex min-h-screen flex-col items-center gap-10 p-10 text-center">
-      <h1 class="text-4xl">Bonfire 🔥</h1>
+      <h1 class="text-4xl">🔥 Bonfire 🔥</h1>
       <p>
         Bonfire <span class="italic">can be</span> an interface for for burning Algorand ASAs in a
         permissionless, verifiable, and standard way. Vote for xGov-86 if you want an easy way to
