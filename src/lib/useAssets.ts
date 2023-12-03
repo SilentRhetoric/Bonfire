@@ -1,4 +1,4 @@
-import { createComputed, createRoot, on } from "solid-js"
+import { createComputed, createRoot, createSignal, on } from "solid-js"
 import { createStore } from "solid-js/store"
 import { AssetData, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
 
@@ -16,6 +16,8 @@ export function makeAlgoAssetDataObj(amt: number): AssetData {
 }
 
 function useAssets() {
+  const [accountAssets, setAccountAssets] = createSignal<AssetData[]>([makeAlgoAssetDataObj(0)])
+
   // Use reactive roots to compose app state
   const { address } = UseSolidAlgoWallets
   const { algodClient, getAccountInfo } = UseNetwork
@@ -66,8 +68,6 @@ function useAssets() {
       }
     }
   }
-
-  const [accountAssets, setAccountAssets] = createStore<AssetData[]>([makeAlgoAssetDataObj(0)])
 
   createComputed(
     on(

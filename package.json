@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^5.0.1",
+    "@tanstack/solid-table": "^8.10.7",
     "algosdk": "^2.7.0",
     "solid-algo-wallets": "^0.0.12",
     "solid-js": "^1.8.5"
