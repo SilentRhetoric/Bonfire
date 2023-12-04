@@ -3,18 +3,8 @@ import { For, Show } from "solid-js"
 import { ellipseString } from "../lib/utilities"
 
 export default function Header() {
-  const {
-    activeWallet,
-    walletName,
-    address,
-    setAddress,
-    connectWallet,
-    reconnectWallet,
-    disconnectWallet,
-    walletInterfaces,
-    transactionSigner,
-  } = UseSolidAlgoWallets
-  const { algodClient, activeNetwork, setActiveNetwork, networkNames, getTxUrl } = UseNetwork
+  const { activeWallet, address, setAddress, disconnectWallet } = UseSolidAlgoWallets
+  const { activeNetwork, setActiveNetwork, networkNames } = UseNetwork
   return (
     <div class="flex flex-row items-center p-2">
       <div class="flex text-2xl md:text-4xl">
@@ -24,7 +14,7 @@ export default function Header() {
         </h1>
       </div>
 
-      <div class="grow"></div>
+      <div class="grow" />
       <div class="flex gap-2">
         <Show when={activeWallet() !== undefined}>
           <div class="dropdown">
@@ -62,7 +52,7 @@ export default function Header() {
               tabIndex={0}
               class="menu dropdown-content z-[1] rounded-box bg-base-100 p-2 shadow"
             >
-              <For each={activeWallet().accounts()}>
+              <For each={activeWallet()?.accounts()}>
                 {(acc) => (
                   <li>
                     <a onClick={() => setAddress(acc.address)}>{ellipseString(acc.address, 4)}</a>

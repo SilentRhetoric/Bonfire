@@ -9,8 +9,8 @@ import {
 import { AssetData } from "solid-algo-wallets"
 import { Accessor, Component, For, createEffect, createMemo, createSignal } from "solid-js"
 
-function IndeterminateCheckbox(props) {
-  let ref
+function IndeterminateCheckbox(props: any) {
+  let ref: HTMLInputElement
 
   createEffect(() => {
     if (typeof props.indeterminate === "boolean") {
@@ -35,6 +35,7 @@ export const ASATable: Component<{ assets: Accessor<AssetData[]> }> = (props) =>
   const columns: ColumnDef<AssetData>[] = [
     {
       id: "select",
+      // eslint-disable-next-line solid/no-destructure
       header: ({ table }) => (
         <IndeterminateCheckbox
           {...{
@@ -44,6 +45,7 @@ export const ASATable: Component<{ assets: Accessor<AssetData[]> }> = (props) =>
           }}
         />
       ),
+      // eslint-disable-next-line solid/no-destructure
       cell: ({ row }) => (
         <IndeterminateCheckbox
           {...{
@@ -55,13 +57,12 @@ export const ASATable: Component<{ assets: Accessor<AssetData[]> }> = (props) =>
         />
       ),
     },
-    { accessorKey: "amount", cell: (info) => info.getValue(), footer: (props) => props.column.id },
-    { accessorKey: "id", cell: (info) => info.getValue(), footer: (props) => props.column.id },
-    { accessorKey: "name", cell: (info) => info.getValue(), footer: (props) => props.column.id },
+    { accessorKey: "amount", cell: (info) => info.getValue() },
+    { accessorKey: "id", cell: (info) => info.getValue() },
+    { accessorKey: "name", cell: (info) => info.getValue() },
     {
       accessorKey: "unitName",
       cell: (info) => info.getValue(),
-      footer: (props) => props.column.id,
     },
   ]
 

@@ -1,5 +1,4 @@
 import { createComputed, createRoot, createSignal, on } from "solid-js"
-import { createStore } from "solid-js/store"
 import { AssetData, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
 
 // The numbers in this type may need to be converted to BigInt in the library

@@ -26,16 +26,13 @@ import Header from "./components/Header"
 const App: Component = () => {
   const {
     activeWallet,
-    walletName,
     address,
-    setAddress,
     connectWallet,
     reconnectWallet,
-    disconnectWallet,
     walletInterfaces,
     transactionSigner,
   } = UseSolidAlgoWallets
-  const { algodClient, activeNetwork, setActiveNetwork, networkNames, getTxUrl } = UseNetwork
+  const { algodClient, getTxUrl } = UseNetwork
   onMount(() => reconnectWallet())
   const { accountAssets } = useAssets
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
@@ -44,14 +41,17 @@ const App: Component = () => {
     addr: address(),
     signer: transactionSigner,
   }))
-  const appDetails: AppDetails = {
-    sender: transactionSignerAccount(),
-    resolveBy: "id",
-    id: 1062,
-  }
-  const appClient = new Arc54Client(appDetails, algodClient())
+  const appDetails = createMemo<AppDetails>(() => {
+    return {
+      sender: transactionSignerAccount(),
+      resolveBy: "id",
+      id: 1011,
+    }
+  })
 
   async function burnAsa() {
+    const appClient = new Arc54Client(appDetails(), algodClient())
+
     setConfirmedTxn("")
     const asaID = 1067
     const bonfireAddress = (await appClient.appClient.getAppReference()).appAddress
@@ -92,7 +92,7 @@ const App: Component = () => {
 
   return (
     <ErrorBoundary fallback={(err, reset) => <div onClick={reset}>Error: {err.toString()}</div>}>
-      <div class="relative flex min-h-[calc(100vh-72px)] max-w-screen-xl flex-col bg-gradient-to-br from-base-200 to-base-100">
+      <div class="relative flex min-h-[calc(100vh-72px)] max-w-screen-xl flex-col bg-gradient-to-br from-base-300 to-base-100">
         <Header />
         <div class="flex h-screen flex-col items-center justify-start p-4 text-center">
           <Show
@@ -120,16 +120,8 @@ const App: Component = () => {
               </div>
             }
           >
-            {/* <button
-              class="btn m-1 w-60"
-              onClick={() => sendTxn()}
-              disabled={activeWallet() === undefined}
-              aria-label="Send 0A transaction"
-            >
-              Send 0A Transaction
-            </button> */}
             <button
-              class="btn w-60"
+              class="btn"
               onClick={() => burnAsa()}
               disabled={activeWallet() === undefined}
               aria-label="Burn ASA"
@@ -159,6 +151,14 @@ const App: Component = () => {
         </div>
         <Footer />
       </div>
+      <button
+        class="btn m-1 w-60"
+        onClick={() => sendTxn()}
+        disabled={activeWallet() === undefined}
+        aria-label="Send 0A transaction"
+      >
+        Send 0A Transaction
+      </button>
     </ErrorBoundary>
   )
 }
