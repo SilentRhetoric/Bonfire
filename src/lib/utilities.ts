@@ -19,7 +19,7 @@ export function formatNumWithDecimals(num: number, decimals: number): string {
 
 export function displayAssetAmount(asset: AssetData) {
   try {
-    return numberWithCommas(formatNumWithDecimals(asset.amount, asset.decimals))
+    return formatNumWithDecimals(asset.amount, asset.decimals)
   } catch (e) {
     return "0"
   }
@@ -28,4 +28,9 @@ export function displayAssetAmount(asset: AssetData) {
 export function makeBigIntAmount(decimal_amount: number, asset: AssetData): bigint {
   const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
   return bigIntAmount
+}
+
+export function makeIntegerAmount(decimal_amount: number, asset: AssetData): number {
+  const intAmount = decimal_amount * Math.pow(10, asset.decimals)
+  return intAmount
 }

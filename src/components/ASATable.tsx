@@ -5,9 +5,64 @@ import {
   flexRender,
   SortingState,
   getSortedRowModel,
+  RowData,
 } from "@tanstack/solid-table"
 import { AssetData } from "solid-algo-wallets"
-import { Accessor, Component, For, createEffect, createMemo, createSignal } from "solid-js"
+import { Component, For, createComputed, createEffect, createMemo, createSignal } from "solid-js"
+import { createStore } from "solid-js/store"
+import { displayAssetAmount, makeIntegerAmount } from "../lib/utilities"
+
+declare module "@tanstack/solid-table" {
+  // eslint-disable-next-line no-unused-vars
+  interface TableMeta<TData extends RowData> {
+    // eslint-disable-next-line no-unused-vars
+    updateData: (rowIndex: number, columnId: keyof AssetData, value: unknown) => void
+  }
+}
+
+// Give our default column cell renderer editing superpowers!
+const defaultColumn: Partial<ColumnDef<AssetData>> = {
+  // eslint-disable-next-line solid/no-destructure
+  cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
+    // cell: (c) => {
+    const initialValue = getValue()
+    // We need to keep and update the state of the cell normally
+    const [value, setValue] = createSignal(initialValue)
+    createComputed(() => console.debug("value: ", value()))
+
+    // When the input is blurred, we'll call our table meta's updateData function
+    const onBlur = () => {
+      const intAmt = makeIntegerAmount(Number(value()), original)
+      table.options.meta?.updateData(index, id, intAmt)
+    }
+
+    const onChange = (
+      e: Event & {
+        currentTarget: HTMLInputElement
+        target: HTMLInputElement
+      },
+    ) => {
+      setValue(e.target.value)
+      // const intAmt = makeIntegerAmount(Number(value()), original)
+      // table.options.meta?.updateData(index, id, intAmt)
+    }
+
+    // If the initialValue is changed external, sync it up with our state
+    createEffect(() => {
+      setValue(initialValue)
+    })
+
+    return (
+      <input
+        value={displayAssetAmount(original)}
+        // onChange={(e) => setValue(e.target.value)}
+        onChange={onChange}
+        onBlur={onBlur}
+        class="input"
+      />
+    )
+  },
+}
 
 function IndeterminateCheckbox(props: any) {
   let ref: HTMLInputElement
@@ -28,74 +83,117 @@ function IndeterminateCheckbox(props: any) {
   )
 }
 
-export const ASATable: Component<{ assets: Accessor<AssetData[]> }> = (props) => {
+export const ASATable: Component<{ assets: AssetData[] }> = (props) => {
   const [sorting, setSorting] = createSignal<SortingState>([])
   const [rowSelection, setRowSelection] = createSignal({})
 
-  const columns: ColumnDef<AssetData>[] = [
+  const columns = [
     {
       id: "select",
-      // eslint-disable-next-line solid/no-destructure
-      header: ({ table }) => (
+      header: (data: {
+        table: {
+          getIsAllRowsSelected: () => any
+          getIsSomeRowsSelected: () => any
+          getToggleAllRowsSelectedHandler: () => any
+        }
+      }) => (
         <IndeterminateCheckbox
           {...{
-            checked: table.getIsAllRowsSelected(),
-            indeterminate: table.getIsSomeRowsSelected(),
-            onChange: table.getToggleAllRowsSelectedHandler(),
+            checked: data.table.getIsAllRowsSelected(),
+            indeterminate: data.table.getIsSomeRowsSelected(),
+            onChange: data.table.getToggleAllRowsSelectedHandler(),
           }}
         />
       ),
-      // eslint-disable-next-line solid/no-destructure
-      cell: ({ row }) => (
+      cell: (data: {
+        row: {
+          getIsSelected: () => any
+          getCanSelect: () => any
+          getIsSomeSelected: () => any
+          getToggleSelectedHandler: () => any
+        }
+      }) => (
         <IndeterminateCheckbox
           {...{
-            checked: row.getIsSelected(),
-            disabled: !row.getCanSelect(),
-            indeterminate: row.getIsSomeSelected(),
-            onChange: row.getToggleSelectedHandler(),
+            checked: data.row.getIsSelected(),
+            disabled: !data.row.getCanSelect(),
+            indeterminate: data.row.getIsSomeSelected(),
+            onChange: data.row.getToggleSelectedHandler(),
           }}
         />
       ),
     },
-    { accessorKey: "amount", cell: (info) => info.getValue() },
-    { accessorKey: "id", cell: (info) => info.getValue() },
-    { accessorKey: "name", cell: (info) => info.getValue() },
+    {
+      accessorKey: "amount",
+      // cell: (info: { row: { original: AssetData } }) => displayAssetAmount(info.row.original),
+    },
+    { accessorKey: "id", cell: (info: { getValue: () => any }) => info.getValue() },
+    { accessorKey: "name", cell: (info: { getValue: () => any }) => info.getValue() },
     {
       accessorKey: "unitName",
-      cell: (info) => info.getValue(),
+      cell: (info: { getValue: () => any }) => info.getValue(),
     },
   ]
 
-  // Frozen assets aren't burnable in the Bonfire so we remove them
-  const burnableAssets = createMemo(() => props.assets().filter((asset) => !asset.frozen))
+  const table = createMemo(() => {
+    const [burnableAssets, setBurnableAssets] = createStore(props.assets)
+    createComputed(() => console.debug("Store updated: ", ...burnableAssets))
 
-  const table = createSolidTable({
-    get data() {
-      return burnableAssets()
-    },
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    enableRowSelection: true,
-    enableMultiRowSelection: true,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      get sorting() {
-        return sorting()
+    return createSolidTable({
+      // get data() {
+      //   return burnableAssets()
+      // },
+      data: burnableAssets,
+      columns,
+      defaultColumn,
+      getCoreRowModel: getCoreRowModel(),
+      enableRowSelection: true,
+      enableMultiRowSelection: true,
+      onSortingChange: setSorting,
+      getSortedRowModel: getSortedRowModel(),
+      state: {
+        get sorting() {
+          return sorting()
+        },
+        get rowSelection() {
+          return rowSelection()
+        },
       },
-      get rowSelection() {
-        return rowSelection()
+      onRowSelectionChange: setRowSelection,
+      // Provide our updateData function to our table meta
+      meta: {
+        updateData: (rowIndex, columnId: keyof AssetData, value: any) => {
+          console.debug(`Updating value ${value}`)
+          setBurnableAssets(
+            // rowIndex,
+            // columnId,
+            // value,
+            (prev) => {
+              console.debug("prev: ", prev)
+              let modified = []
+              modified = prev.map((row, index) => {
+                if (index === rowIndex) {
+                  return {
+                    ...prev[rowIndex]!,
+                    [columnId]: value,
+                  }
+                }
+                return row
+              })
+              console.debug("modified: ", modified)
+              return modified
+            },
+          )
+        },
       },
-    },
-    enableSubRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    })
   })
 
   return (
     <div class="overflow-x-auto">
       <table class="table table-xs">
         <thead class="text text-lg text-base-content">
-          <For each={table.getHeaderGroups()}>
+          <For each={table().getHeaderGroups()}>
             {(headerGroup) => (
               <tr>
                 <For each={headerGroup.headers}>
@@ -146,7 +244,7 @@ export const ASATable: Component<{ assets: Accessor<AssetData[]> }> = (props) =>
           </For>
         </thead>
         <tbody>
-          <For each={table.getRowModel().rows}>
+          <For each={table().getRowModel().rows}>
             {(row) => (
               <tr class="hover">
                 <For each={row.getVisibleCells()}>

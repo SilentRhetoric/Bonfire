@@ -146,7 +146,7 @@ const App: Component = () => {
                 </a>
               </button>
             </Show>
-            <ASATable assets={accountAssets} />
+            <ASATable assets={accountAssets()} />
           </Show>
         </div>
         <Footer />
