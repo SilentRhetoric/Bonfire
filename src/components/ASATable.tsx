@@ -16,7 +16,7 @@ declare module "@tanstack/solid-table" {
   // eslint-disable-next-line no-unused-vars
   interface TableMeta<TData extends RowData> {
     // eslint-disable-next-line no-unused-vars
-    updateData: (rowIndex: number, columnId: keyof AssetData, value: unknown) => void
+    updateData: (rowIndex: number, columnId: string | keyof AssetData, value: unknown) => void
   }
 }
 
@@ -162,7 +162,7 @@ export const ASATable: Component<{ assets: AssetData[] }> = (props) => {
       onRowSelectionChange: setRowSelection,
       // Provide our updateData function to our table meta
       meta: {
-        updateData: (rowIndex, columnId: keyof AssetData, value: any) => {
+        updateData: (rowIndex, columnId: string | keyof AssetData, value: any) => {
           console.debug(`Updating value ${value}`)
           setBurnableAssets(
             // rowIndex,

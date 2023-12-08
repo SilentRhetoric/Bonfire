@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.fade-element {
+  animation: fade 3s infinite;
+}
+
+.fade-element:nth-child(2) {
+  animation-delay: 1.5s;
+}

@@ -1,6 +1,6 @@
 import algonode from "../assets/algonode.png"
 
-export function Footer() {
+export default function Footer() {
   return (
     <footer class="flex flex-col justify-center gap-2 p-4">
       <p>

@@ -6,10 +6,10 @@ export default function Header() {
   const { activeWallet, address, setAddress, disconnectWallet } = UseSolidAlgoWallets
   const { activeNetwork, setActiveNetwork, networkNames } = UseNetwork
   return (
-    <div class="flex flex-row items-center p-2">
-      <div class="flex text-2xl md:text-4xl">
-        <h1 class="flex">🔥</h1>
-        <h1 class="ml-1 flex bg-gradient-to-r from-yellow-500 to-red-500 bg-clip-text font-bold text-transparent">
+    <div class="flex flex-row items-center p-2 sm:px-4">
+      <div class="flex text-3xl sm:text-4xl">
+        {/* <h1 class="flex">🔥</h1> */}
+        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 to-red-500 bg-clip-text font-bold text-transparent">
           Bonfire
         </h1>
       </div>
@@ -23,7 +23,7 @@ export default function Header() {
               tabindex="0"
               role="button"
             >
-              {activeNetwork()}
+              {activeNetwork()[0]}
             </div>
             <ul class="menu dropdown-content z-[1] rounded-box bg-base-100 p-2 shadow">
               <For each={networkNames}>
