@@ -1,8 +1,11 @@
-import { createComputed, createRoot, createSignal, on } from "solid-js"
-import { AssetData, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
+import { createComputed, createRoot, on } from "solid-js"
+import { UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
+import { BonfireAssetData } from "./types"
+import { numberToDecimal } from "./utilities"
+import { createStore } from "solid-js/store"
 
 // The numbers in this type may need to be converted to BigInt in the library
-export function makeAlgoAssetDataObj(amt: number): AssetData {
+export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
   return {
     id: 0,
     amount: amt,
@@ -11,11 +14,14 @@ export function makeAlgoAssetDataObj(amt: number): AssetData {
     name: "ALGO",
     unitName: "ALGO",
     total: 10000000000000000,
-  } as AssetData
+    decimalAmount: numberToDecimal(amt, 6),
+  }
 }
 
 function useAssets() {
-  const [accountAssets, setAccountAssets] = createSignal<AssetData[]>([makeAlgoAssetDataObj(0)])
+  const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([
+    makeAlgoAssetDataObj(0),
+  ])
 
   // Use reactive roots to compose app state
   const { address } = UseSolidAlgoWallets
@@ -34,7 +40,7 @@ function useAssets() {
         const assetsFromRes = info.assets
         // console.debug("Assets from response", assetsFromRes)
         // Reshape the asset data from the account info slightly
-        const assets: AssetData[] = [
+        const assets: BonfireAssetData[] = [
           algoAssetEntry,
           ...assetsFromRes.map(({ "asset-id": id, amount, "is-frozen": frozen }) => ({
             id: Number(id),
@@ -43,6 +49,7 @@ function useAssets() {
             frozen,
             decimals: 0,
             total: 0,
+            decimalAmount: 0,
           })),
         ]
         await Promise.all(
@@ -55,11 +62,12 @@ function useAssets() {
               asset.unitName = params["unit-name"]
               asset.decimals = params.decimals
               asset.total = params.total
+              asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
               // console.debug("Asset after: ", JSON.stringify(asset))
             }
           }),
         )
-        // console.debug("Assets array: ", assets)
+        console.debug("Assets array: ", assets)
         setAccountAssets(assets)
       } catch (e) {
         setAccountAssets([makeAlgoAssetDataObj(0)])
@@ -83,8 +91,11 @@ function useAssets() {
     ),
   )
 
+  createComputed(() => console.debug("Store updated: ", ...accountAssets))
+
   return {
     accountAssets,
+    setAccountAssets,
   }
 }
 export default createRoot(useAssets)

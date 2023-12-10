@@ -8,8 +8,7 @@ export default function Header() {
   return (
     <div class="flex flex-row items-center p-2 sm:px-4">
       <div class="flex text-3xl sm:text-4xl">
-        {/* <h1 class="flex">🔥</h1> */}
-        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 to-red-500 bg-clip-text font-bold text-transparent">
+        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text font-bold text-transparent">
           Bonfire
         </h1>
       </div>
@@ -19,7 +18,7 @@ export default function Header() {
         <Show when={activeWallet() !== undefined}>
           <div class="dropdown">
             <div
-              class="btn"
+              class="btn btn-ghost"
               tabindex="0"
               role="button"
             >
@@ -42,7 +41,7 @@ export default function Header() {
           </div>
           <div class="dropdown">
             <div
-              class="btn"
+              class="btn btn-ghost"
               tabindex={0}
               role="button"
             >

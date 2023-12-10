@@ -15,7 +15,7 @@ export default function Footer() {
           ARC-54
         </a>{" "}
         standard. This enables explorers, DeFi metrics, and other tools in the ecosystem to subtract
-        burned ASAs from measures of token supply.
+        ASAs burned here from measures of token supply.
       </p>
       <a
         href="https://x.com/silentrhetoric"

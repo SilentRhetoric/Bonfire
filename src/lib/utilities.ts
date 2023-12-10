@@ -34,3 +34,9 @@ export function makeIntegerAmount(decimal_amount: number, asset: AssetData): num
   const intAmount = decimal_amount * Math.pow(10, asset.decimals)
   return intAmount
 }
+
+export function numberToDecimal(num: number, decimals: number): number {
+  const shifted_num = (num /= Math.pow(10, decimals))
+  const shifted_num_string = shifted_num
+  return shifted_num_string
+}

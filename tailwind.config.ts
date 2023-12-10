@@ -8,6 +8,7 @@ const config: Config = {
         // Creating a custom theme starting by spreading the built-in theme
         bonfire: {
           ...require("daisyui/src/theming/themes")["luxury"],
+          "base-content": "#ffa200",
         },
       },
     ],

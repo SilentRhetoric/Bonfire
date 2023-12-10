@@ -12,8 +12,10 @@ import {
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { ellipseString } from "../lib/utilities"
-import { AccountInfo } from "../lib/types"
+import { ellipseString, makeIntegerAmount } from "../lib/utilities"
+import { AccountInfo, BonfireAssetData } from "../lib/types"
+import { RowSelectionState } from "@tanstack/solid-table"
+import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 
 const APP_ID = 1011
 
@@ -54,24 +56,61 @@ export default function Main() {
     return accountInfo as AccountInfo
   }
 
-  const [bonfireInfo, { refetch: refetchBonfireInfo }] = createResource(bonfire, getBonfireInfo)
+  const [bonfireInfo, { refetch: refetchBonfireInfo }] = createResource(algodClient, getBonfireInfo)
 
-  async function burnAsa() {
+  // eslint-disable-next-line no-unused-vars
+  async function burn(selections: RowSelectionState) {
     setConfirmedTxn("")
-    const asaID = 1067
     const bonfireAddress = (await bonfire().appClient.getAppReference()).appAddress
     const suggestedParams = await algodClient().getTransactionParams().do()
     suggestedParams.flatFee = true
-    suggestedParams.fee = suggestedParams.minFee * 2
-    const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: address(),
-      to: bonfireAddress,
-      assetIndex: asaID,
-      amount: 1,
-      suggestedParams,
+
+    const assetsToBurn: BonfireAssetData[] = Object.entries(selections).map(([k]) => {
+      return accountAssets[Number(k)]
     })
-    const args = { asa: asaID }
-    const result = await bonfire().compose().arc54OptIntoAsa(args).addTransaction(axfer).execute()
+
+    let slots = 0
+    let numOptInCalls = 0
+
+    const atc = bonfire().compose()
+
+    for (let i = 0; i < assetsToBurn.length; i++) {
+      const asset = assetsToBurn[i]
+      const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: address(),
+        to: bonfireAddress,
+        assetIndex: asset.id,
+        amount: makeIntegerAmount(asset.decimalAmount, asset),
+        closeRemainderTo: bonfireAddr,
+        suggestedParams,
+      })
+      atc.addTransaction(axfer)
+      slots = slots + 1
+
+      if (bonfireInfo()?.assets.find((a) => a["asset-id"] !== asset.id)) {
+        atc.arc54OptIntoAsa(
+          { asa: asset.id },
+          { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
+        )
+        numOptInCalls = numOptInCalls + 1
+        slots = slots + 1
+      }
+    }
+
+    const numMBRPayments =
+      Math.floor((bonfireInfo()!.amount - bonfireInfo()!["min-balance"]) / 100000) - numOptInCalls
+
+    if (numMBRPayments > 0) {
+      const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
+        from: address(),
+        to: bonfireAddr,
+        amount: 100000 * numMBRPayments,
+        suggestedParams,
+      })
+      atc.addTransaction(payTxn)
+    }
+
+    const result = await atc.execute()
     console.log("Txn confirmed result: ", result)
     setConfirmedTxn(result.txIds[0])
   }
@@ -106,13 +145,7 @@ export default function Main() {
                 {(wallet) => (
                   <div class="flex gap-1">
                     <button
-                      class="btn btn-primary w-20"
-                      onClick={() => connectWallet(wallet)}
-                    >
-                      {wallet.icon()}
-                    </button>
-                    <button
-                      class="btn btn-primary w-60"
+                      class="btn btn-ghost w-60 bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 text-black"
                       onClick={() => connectWallet(wallet)}
                     >
                       {wallet.image()}
@@ -130,27 +163,29 @@ export default function Main() {
           </div>
           <Show when={bonfireInfo.state === "ready"}>
             <div class="flex flex-row gap-2">
-              <p>ASAshes: {bonfireInfo()?.assets.length}</p>
               <p>
                 Extra Logs:{" "}
                 {Math.floor((bonfireInfo()!.amount - bonfireInfo()!["min-balance"]) / 100000)}
               </p>
+              <p>ASAshes: {bonfireInfo()?.assets.length}</p>
             </div>
           </Show>
           <button
             class="btn"
-            onClick={() => burnAsa()}
+            onClick={() => null}
             disabled={activeWallet() === undefined}
             aria-label="Burn ASA"
           >
             Burn 🔥
           </button>
-          <ASATable assets={accountAssets()} />
+          <Show when={accountAssets.length > 1}>
+            <ASATable assets={accountAssets} />
+          </Show>
         </Show>
       </div>
       {/* <div>{JSON.stringify(bonfireInfo())}</div> */}
       <button
-        class="btn m-1 w-60"
+        class="btn btn-ghost m-1 w-60"
         onClick={() => sendTxn()}
         disabled={activeWallet() === undefined}
         aria-label="Send 0A transaction"
@@ -162,7 +197,7 @@ export default function Main() {
         fallback={null}
       >
         <button
-          class="btn"
+          class="btn btn-ghost"
           disabled={confirmedTxn().length === 0}
         >
           <a
