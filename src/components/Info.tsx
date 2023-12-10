@@ -39,7 +39,8 @@ export default function Info() {
         Anytime you want to permanently burn ASAs Bonfire can help. This could be to clear tokens
         out of an account without sending them back to their creators. Or, if you want to remove
         tokens from circulating supply (provided they do not have clawback enabled), the Bonfire
-        smart contract is the standard place to do so.
+        smart contract is the standard place to do so. Note that ASAs with clawback enabled can
+        never be permanently burned.
       </p>
       <h3>Who can use Bonfire?</h3>
       <p>
@@ -76,9 +77,9 @@ export default function Info() {
       <h3>Pay it forward</h3>
       <p>
         It costs 0.1A for the smart contract to opt into each ASA. The interface displays how many
-        You can donate extra "logs" to put on the fire for 0.1A each so that the next person who
-        needs to burn some assets can do so without needing to pay the MBR to the smart contract.
-        The app displays how many extra logs are currently available.
+        extra "logs" are available for burning new assets. You can donate extra "logs" to put on the
+        fire for 0.1A each so that the next person who needs to burn some assets can do so without
+        needing to pay the MBR to the smart contract.
       </p>
     </div>
   )
