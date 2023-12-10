@@ -3,15 +3,14 @@ import {
   // ColumnDef,
   createSolidTable,
   flexRender,
-  SortingState,
   getSortedRowModel,
   RowData,
   CellContext,
 } from "@tanstack/solid-table"
 import { AssetData } from "solid-algo-wallets"
-import { Component, For, createComputed, createEffect, createMemo, createSignal } from "solid-js"
+import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
-import useAssets from "../lib/useAssets"
+import useBonfire from "../lib/useBonfire"
 
 declare module "@tanstack/solid-table" {
   // eslint-disable-next-line no-unused-vars
@@ -91,13 +90,12 @@ function IndeterminateCheckbox(props: any) {
   )
 }
 
-export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
-  const { accountAssets, setAccountAssets } = useAssets
-  const [sorting, setSorting] = createSignal<SortingState>([])
-  const [rowSelection, setRowSelection] = createSignal({})
+export const ASATable: Component = () => {
+  const { accountAssets, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
+    useBonfire
+  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0)])
 
-  createComputed(() => console.debug("accountAsssets in component: ", accountAssets))
-  createComputed(() => console.debug(rowSelection()))
+  // createComputed(() => console.debug("accountAsssets in component: ", accountAssets))
 
   const columns = [
     {
@@ -143,7 +141,7 @@ export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
         const initialValue = c.getValue() as number
         // We need to keep and update the state of the cell normally
         const [value, setValue] = createSignal<number>(initialValue)
-        createComputed(() => console.debug("value: ", value()))
+        // createComputed(() => console.debug("value: ", value()))
 
         // When the input is blurred, we'll call our table meta's updateData function
         const onBlur = () => {
@@ -174,7 +172,7 @@ export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
             value={value()}
             onChange={onChange}
             onBlur={onBlur}
-            class="input w-40 text-right"
+            class="input input-xs w-32 text-right text-sm"
             type="number"
             max={c.row.original.decimalAmount}
             min={0}
@@ -195,7 +193,7 @@ export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
     { accessorKey: "id", cell: (info: { getValue: () => any }) => info.getValue(), header: "ID" },
   ]
 
-  const burnableAsas = createMemo(() => [...props.assets].filter((a) => a.id > 0))
+  // The spread creates a new array so that this is reactive to all changes
 
   const table = createMemo(() => {
     return createSolidTable({
@@ -223,74 +221,70 @@ export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
           console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
           setAccountAssets(
             // This method updates the store but changing one element isn't reactive
-            rowIndex,
-            columnId as keyof BonfireAssetData,
-            value,
+            // https://www.solidjs.com/docs/latest/api#arrays-in-stores
+            // rowIndex,
+            // columnId as keyof BonfireAssetData,
+            // value,
             // This method replaces the whole array which makes it reactive
-            // (prev) => {
-            //   console.debug("prev: ", prev)
-            //   let modified = []
-            //   modified = prev.map((row, index) => {
-            //     if (index === rowIndex) {
-            //       return {
-            //         ...prev[rowIndex]!,
-            //         [columnId]: value,
-            //       }
-            //     }
-            //     return row
-            //   })
-            //   console.debug("modified: ", modified)
-            //   return modified
-            // },
+            (prev) => {
+              console.debug("prev: ", prev)
+              let modified = []
+              modified = prev.map((row, index) => {
+                if (index === rowIndex) {
+                  return {
+                    ...prev[rowIndex]!,
+                    [columnId]: value,
+                  }
+                }
+                return row
+              })
+              console.debug("modified: ", modified)
+              return modified
+            },
           )
-          console.debug("accountssets: ", accountAssets)
         },
       },
     })
   })
 
   return (
-    <div class="overflow-x-auto">
-      <table class="table table-xs">
-        <thead class="text text-lg text-base-content">
+    <div class="max-h-[432px] overflow-y-auto">
+      <table class="table table-pin-rows table-xs">
+        <thead class="text text-base text-base-content">
           <For each={table().getHeaderGroups()}>
             {(headerGroup) => (
               <tr>
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>
-                      <div class="hover flex">
+                      <div class="hover flex items-center justify-center">
                         {flexRender(header.column.columnDef.header, header.getContext())}{" "}
                         {{
                           asc: (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="1.5"
-                              stroke="currentColor"
-                              class="h-6 w-6"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="h-4 w-4"
                             >
                               <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18"
+                                fill-rule="evenodd"
+                                d="M10 18a.75.75 0 01-.75-.75V4.66L7.3 6.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 01-1.1 1.02l-1.95-2.1v12.59A.75.75 0 0110 18z"
+                                clip-rule="evenodd"
                               />
                             </svg>
                           ),
                           desc: (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="1.5"
-                              stroke="currentColor"
-                              class="h-6 w-6"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="h-4 w-4"
                             >
                               <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3"
+                                fill-rule="evenodd"
+                                d="M10 2a.75.75 0 01.75.75v12.59l1.95-2.1a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02l1.95 2.1V2.75A.75.75 0 0110 2z"
+                                clip-rule="evenodd"
                               />
                             </svg>
                           ),
@@ -330,6 +324,12 @@ export const ASATable: Component<{ assets: BonfireAssetData[] }> = (props) => {
         }
       >
         Log table.getSelectedRowModel().flatRows
+      </button> */}
+      {/* <button
+        class="btn-ghost"
+        onClick={() => console.debug("Store: ", accountAssets)}
+      >
+        Log store
       </button> */}
     </div>
   )

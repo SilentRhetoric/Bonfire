@@ -1,8 +1,15 @@
-import { createComputed, createRoot, on } from "solid-js"
-import { UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
+import { createComputed, createMemo, createResource, createRoot, createSignal, on } from "solid-js"
+import { AccountInfo, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
 import { BonfireAssetData } from "./types"
 import { numberToDecimal } from "./utilities"
 import { createStore } from "solid-js/store"
+import { SortingState } from "@tanstack/solid-table"
+import { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account"
+import { Arc54Client } from "./Arc54Client"
+import { getApplicationAddress } from "algosdk"
+import { AppDetails } from "@algorandfoundation/algokit-utils/types/app-client"
+
+const APP_ID = 1011
 
 // The numbers in this type may need to be converted to BigInt in the library
 export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
@@ -18,13 +25,12 @@ export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
   }
 }
 
-function useAssets() {
-  const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([
-    makeAlgoAssetDataObj(0),
-  ])
+function useBonfire() {
+  const [algoBalance, setAlgoBalance] = createSignal(0)
+  const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
 
   // Use reactive roots to compose app state
-  const { address } = UseSolidAlgoWallets
+  const { address, transactionSigner } = UseSolidAlgoWallets
   const { algodClient, getAccountInfo } = UseNetwork
 
   async function fetchAccountInfo() {
@@ -36,12 +42,11 @@ function useAssets() {
       try {
         const info = await getAccountInfo(addr)
         // console.debug(info)
-        const algoAssetEntry = makeAlgoAssetDataObj(info.amount)
+        setAlgoBalance(info.amount)
         const assetsFromRes = info.assets
         // console.debug("Assets from response", assetsFromRes)
         // Reshape the asset data from the account info slightly
         const assets: BonfireAssetData[] = [
-          algoAssetEntry,
           ...assetsFromRes.map(({ "asset-id": id, amount, "is-frozen": frozen }) => ({
             id: Number(id),
             // idString: id.toString(),
@@ -76,6 +81,39 @@ function useAssets() {
     }
   }
 
+  createComputed(() => console.debug("Store updated: ", ...accountAssets))
+
+  const [sorting, setSorting] = createSignal<SortingState>([])
+  const [rowSelection, setRowSelection] = createSignal({})
+  // createComputed(() => console.debug(rowSelection()))
+
+  const [confirmedTxn, setConfirmedTxn] = createSignal("")
+
+  const transactionSignerAccount = createMemo<TransactionSignerAccount>(() => ({
+    addr: address(),
+    signer: transactionSigner,
+  }))
+  const appDetails = createMemo<AppDetails>(() => {
+    return {
+      sender: transactionSignerAccount(),
+      resolveBy: "id",
+      id: APP_ID,
+    }
+  })
+  const bonfire = createMemo(() => new Arc54Client(appDetails(), algodClient()))
+  const bonfireAddr = getApplicationAddress(APP_ID)
+
+  async function getBonfireInfo(): Promise<AccountInfo> {
+    const accountInfo = await algodClient().accountInformation(bonfireAddr).do()
+    if (!accountInfo) {
+      throw new Error("Unable to get account information")
+    }
+    console.debug(accountInfo)
+    return accountInfo as AccountInfo
+  }
+
+  const [bonfireInfo, { refetch: refetchBonfireInfo }] = createResource(algodClient, getBonfireInfo)
+
   createComputed(
     on(
       [address, algodClient],
@@ -91,11 +129,31 @@ function useAssets() {
     ),
   )
 
-  createComputed(() => console.debug("Store updated: ", ...accountAssets))
+  createComputed(
+    on([confirmedTxn], async () => {
+      fetchAccountInfo()
+      refetchBonfireInfo()
+    }),
+  )
 
   return {
+    APP_ID,
+    bonfireAddr,
+    algoBalance,
+    setAlgoBalance,
     accountAssets,
     setAccountAssets,
+    sorting,
+    setSorting,
+    rowSelection,
+    setRowSelection,
+    confirmedTxn,
+    setConfirmedTxn,
+    transactionSignerAccount,
+    bonfire,
+    bonfireInfo,
+    refetchBonfireInfo,
+    fetchAccountInfo,
   }
 }
-export default createRoot(useAssets)
+export default createRoot(useBonfire)
