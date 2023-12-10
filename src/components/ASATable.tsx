@@ -36,6 +36,7 @@ const IndeterminateCheckbox: Component<{
       ref={(el) => (ref = el)}
       class={"checkbox"}
       name="Select asset"
+      aria-label="Select asset"
       {...props}
     />
   )
@@ -128,6 +129,7 @@ export const ASATable: Component = () => {
             max={c.row.original.decimalAmount}
             min={0}
             name="Asset amount"
+            aria-label="Asset amount"
           />
         )
       },
@@ -207,7 +209,7 @@ export const ASATable: Component = () => {
         <thead class="text text-base text-base-content">
           <For each={table().getHeaderGroups()}>
             {(headerGroup) => (
-              <tr>
+              <tr class="bg-transparent">
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>

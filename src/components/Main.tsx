@@ -32,9 +32,14 @@ export default function Main() {
   } = useBonfire
   const extraLogs = createMemo(() => calcExtraLogs(bonfireInfo()))
   const [numLogs, setNumLogs] = createSignal(0)
+  const [waitingBurn, setWaitingBurn] = createSignal(false)
+  const [waitingDonate, setWaitingDonate] = createSignal(false)
 
   // eslint-disable-next-line no-unused-vars
   async function burn() {
+    setWaitingBurn(true)
+    await new Promise((r) => setTimeout(r, 1000))
+
     setConfirmedTxn("")
     const suggestedParams = await algodClient().getTransactionParams().do()
     suggestedParams.flatFee = true
@@ -111,10 +116,14 @@ export default function Main() {
       const result = await group.execute()
       console.debug("Txn confirmed result: ", result)
       setConfirmedTxn(result.txIds[0])
+      setWaitingBurn(false)
     }
   }
 
   async function donateLogs() {
+    setWaitingDonate(true)
+    await new Promise((r) => setTimeout(r, 1000))
+
     setConfirmedTxn("")
     const suggestedParams = await algodClient().getTransactionParams().do()
 
@@ -131,6 +140,7 @@ export default function Main() {
     const result = await atc.execute(algodClient(), 4)
     console.debug("Txn confirmed: ", result)
     setConfirmedTxn(result.txIDs[0])
+    setWaitingDonate(false)
   }
 
   return (
@@ -159,7 +169,7 @@ export default function Main() {
               </div>
             }
           >
-            <div class="flex flex-col gap-4 lg:flex-row lg:gap-8">
+            <div class="flex flex-col gap-4 md:flex-row md:gap-8">
               <div class="flex flex-col items-center gap-4">
                 <div class="grid grid-cols-1 grid-rows-1 flex-col text-9xl">
                   <p class="fade-element col-start-1 row-start-1 -scale-x-100">🔥</p>
@@ -172,9 +182,14 @@ export default function Main() {
                   disabled={
                     activeWallet() === undefined || Object.entries(rowSelection()).length < 1
                   }
-                  aria-label="Burn ASA"
+                  name="Burn ASA"
                 >
-                  Burn
+                  <Show
+                    when={waitingBurn()}
+                    fallback="Burn"
+                  >
+                    <span class="loading loading-spinner" />
+                  </Show>
                 </button>
                 <Show
                   when={bonfireInfo()?.assets !== undefined}
@@ -187,8 +202,10 @@ export default function Main() {
                 </Show>
                 <div class="flex flex-row items-center gap-2">
                   <input
-                    class="input input-sm w-1/2 text-right"
+                    class="input input-sm w-20 text-right"
                     type="number"
+                    name="Number of logs"
+                    aria-label="Number of logs"
                     value={numLogs()}
                     onChange={(
                       e: Event & {
@@ -200,12 +217,17 @@ export default function Main() {
                     }}
                   />
                   <button
-                    class="btn btn-ghost btn-sm m-1 w-1/2"
+                    class="btn btn-ghost btn-sm m-1 w-40"
                     onClick={() => donateLogs()}
                     disabled={activeWallet() === undefined || numLogs() < 1}
                     name="Donate extra logs"
                   >
-                    Donate Extra Logs
+                    <Show
+                      when={waitingDonate()}
+                      fallback="Donate Extra Logs"
+                    >
+                      <span class="loading loading-spinner" />
+                    </Show>
                   </button>
                 </div>
                 <Show
@@ -244,7 +266,10 @@ export default function Main() {
                   </button>
                 </Show>
               </div>
-              <ASATable />
+              <div class="flex flex-col gap-2">
+                <h2 class="text-center text-2xl">Your Asset Holdings</h2>
+                <ASATable />
+              </div>
             </div>
           </Show>
         </Show>

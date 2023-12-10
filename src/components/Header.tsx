@@ -22,7 +22,8 @@ export default function Header() {
           name="information"
           onClick={() => setInfoOpen(!infoOpen())}
         >
-          <svg
+          About
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -35,10 +36,10 @@ export default function Header() {
               stroke-linejoin="round"
               d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
             />
-          </svg>
+          </svg> */}
         </button>
         <Show when={activeWallet() !== undefined}>
-          <div class="dropdown">
+          <div class="dropdown dropdown-end dropdown-bottom">
             <div
               class="btn btn-ghost"
               tabindex="0"
@@ -46,7 +47,7 @@ export default function Header() {
             >
               {activeNetwork()[0]}
             </div>
-            <ul class="menu dropdown-content z-[1] rounded-box bg-base-100 p-2 shadow">
+            <ul class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2">
               <For each={networkNames}>
                 {(network) => (
                   <li>
@@ -61,7 +62,7 @@ export default function Header() {
               </For>
             </ul>
           </div>
-          <div class="dropdown">
+          <div class="dropdown dropdown-end dropdown-bottom">
             <div
               class="btn btn-ghost"
               tabindex={0}
@@ -71,22 +72,24 @@ export default function Header() {
             </div>
             <ul
               tabIndex={0}
-              class="menu dropdown-content z-[1] rounded-box bg-base-100 p-2 shadow"
+              class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2 shadow"
             >
               <For each={activeWallet()?.accounts()}>
                 {(acc) => (
                   <li>
-                    <a onClick={() => setAddress(acc.address)}>{ellipseString(acc.address, 4)}</a>
+                    <div onClick={() => setAddress(acc.address)}>
+                      {ellipseString(acc.address, 4)}
+                    </div>
                   </li>
                 )}
               </For>
               <li>
-                <a
+                <div
                   onClick={() => disconnectWallet()}
                   aria-label="Disconnect"
                 >
                   Disconnect
-                </a>
+                </div>
               </li>
             </ul>
           </div>
