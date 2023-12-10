@@ -1,6 +1,5 @@
 import {
   getCoreRowModel,
-  // ColumnDef,
   createSolidTable,
   flexRender,
   getSortedRowModel,
@@ -13,65 +12,16 @@ import { BonfireAssetData } from "../lib/types"
 import useBonfire from "../lib/useBonfire"
 
 declare module "@tanstack/solid-table" {
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
-    // eslint-disable-next-line no-unused-vars
     updateData: (rowIndex: number, columnId: string | keyof AssetData, value: unknown) => void
   }
 }
 
-// Give our default column cell renderer editing superpowers!
-// This is used to make the amount field into ane ditable number type text input
-// Other columns don't use this; cell rendering is overriden in the columns array
-// const defaultColumn: Partial<ColumnDef<BonfireAssetData>> = {
-//   // eslint-disable-next-line solid/no-destructure
-//   // cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
-//   cell: (c) => {
-//     // cell: (c) => {
-//     const initialValue = c.getValue() as number
-//     // We need to keep and update the state of the cell normally
-//     const [value, setValue] = createSignal<number>(initialValue)
-//     createComputed(() => console.debug("value: ", value()))
-
-//     // When the input is blurred, we'll call our table meta's updateData function
-//     const onBlur = () => {
-//       if (0 < value() && value() <= c.row.original.decimalAmount) {
-//         c.table.options.meta?.updateData(c.row.index, c.column.id, value())
-//       } else {
-//         c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
-//         setValue(c.row.original.decimalAmount)
-//       }
-//     }
-
-//     const onChange = (
-//       e: Event & {
-//         currentTarget: HTMLInputElement
-//         target: HTMLInputElement
-//       },
-//     ) => {
-//       setValue(Number(e.target.value))
-//     }
-
-//     // If the initialValue is changed external, sync it up with our state
-//     createEffect(() => {
-//       setValue(initialValue)
-//     })
-
-//     return (
-//       <input
-//         value={value()}
-//         onChange={onChange}
-//         onBlur={onBlur}
-//         class="input w-40 text-right"
-//         type="number"
-//         max={c.row.original.decimalAmount}
-//         min={0}
-//       />
-//     )
-//   },
-// }
-
-function IndeterminateCheckbox(props: any) {
+const IndeterminateCheckbox: Component<{
+  indeterminate: boolean
+  checked: boolean
+}> = (props) => {
   let ref: HTMLInputElement
 
   createEffect(() => {
@@ -85,6 +35,7 @@ function IndeterminateCheckbox(props: any) {
       type="checkbox"
       ref={(el) => (ref = el)}
       class={"checkbox"}
+      name="Select asset"
       {...props}
     />
   )
@@ -102,9 +53,9 @@ export const ASATable: Component = () => {
       id: "select",
       header: (data: {
         table: {
-          getIsAllRowsSelected: () => any
-          getIsSomeRowsSelected: () => any
-          getToggleAllRowsSelectedHandler: () => any
+          getIsAllRowsSelected: () => boolean
+          getIsSomeRowsSelected: () => boolean
+          getToggleAllRowsSelectedHandler: () => unknown
         }
       }) => (
         <IndeterminateCheckbox
@@ -117,10 +68,10 @@ export const ASATable: Component = () => {
       ),
       cell: (data: {
         row: {
-          getIsSelected: () => any
-          getCanSelect: () => any
-          getIsSomeSelected: () => any
-          getToggleSelectedHandler: () => any
+          getIsSelected: () => boolean
+          getCanSelect: () => boolean
+          getIsSomeSelected: () => boolean
+          getToggleSelectedHandler: () => unknown
         }
       }) => (
         <IndeterminateCheckbox
@@ -176,24 +127,27 @@ export const ASATable: Component = () => {
             type="number"
             max={c.row.original.decimalAmount}
             min={0}
+            name="Asset amount"
           />
         )
       },
     },
     {
       accessorKey: "name",
-      cell: (info: { getValue: () => any }) => info.getValue(),
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
       header: "Name",
     },
     {
       accessorKey: "unitName",
-      cell: (info: { getValue: () => any }) => info.getValue(),
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
       header: "Unit",
     },
-    { accessorKey: "id", cell: (info: { getValue: () => any }) => info.getValue(), header: "ID" },
+    {
+      accessorKey: "id",
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
+      header: "ID",
+    },
   ]
-
-  // The spread creates a new array so that this is reactive to all changes
 
   const table = createMemo(() => {
     return createSolidTable({
@@ -217,7 +171,7 @@ export const ASATable: Component = () => {
       onRowSelectionChange: setRowSelection,
       // Provide our updateData function to our table meta
       meta: {
-        updateData: (rowIndex, columnId: string | keyof AssetData, value: any) => {
+        updateData: (rowIndex, columnId: string | keyof AssetData, value: unknown) => {
           console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
           setAccountAssets(
             // This method updates the store but changing one element isn't reactive
@@ -309,28 +263,6 @@ export const ASATable: Component = () => {
           </For>
         </tbody>
       </table>
-      {/* <p>{JSON.stringify(props.assets())}</p> */}
-      {/* <div>{Object.keys(rowSelection()).length} Rows Selected</div>
-      <button
-        class="btn btn-ghost m-2 p-2"
-        onClick={() => console.info("rowSelection", rowSelection())}
-      >
-        Log `rowSelection` state
-      </button>
-      <button
-        class="btn btn-ghost m-2 p-2"
-        onClick={() =>
-          console.info("table.getSelectedRowModel().flatRows", table.getSelectedRowModel().flatRows)
-        }
-      >
-        Log table.getSelectedRowModel().flatRows
-      </button> */}
-      {/* <button
-        class="btn-ghost"
-        onClick={() => console.debug("Store: ", accountAssets)}
-      >
-        Log store
-      </button> */}
     </div>
   )
 }

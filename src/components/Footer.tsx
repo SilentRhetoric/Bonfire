@@ -3,20 +3,6 @@ import algonode from "../assets/algonode.png"
 export default function Footer() {
   return (
     <footer class="flex flex-col justify-center gap-2 p-4">
-      <p>
-        Bonfire is an interface for burning Algorand ASAs in a permissionless, verifiable, and
-        standard way per the{" "}
-        <a
-          href="https://arc.algorand.foundation/ARCs/arc-0054"
-          target="_blank"
-          aria-label="ARC-54"
-          class="underline"
-        >
-          ARC-54
-        </a>{" "}
-        standard. This enables explorers, DeFi metrics, and other tools in the ecosystem to subtract
-        ASAs burned here from measures of token supply.
-      </p>
       <a
         href="https://x.com/silentrhetoric"
         target="_blank"
@@ -53,12 +39,12 @@ export default function Footer() {
       </a>
       <a
         href="https://algonode.io"
-        aria-label="AlgoNode"
         target="_blank"
         class="flex flex-row"
       >
         <img
           src={algonode}
+          alt="AlgoNode"
           class="m-[-3px] h-8 w-8"
         />
         <p class="ml-2">Powered by AlgoNode</p>

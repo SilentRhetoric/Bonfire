@@ -1,4 +1,4 @@
-import { AssetData } from "solid-algo-wallets"
+import { AccountInfo, AssetData } from "solid-algo-wallets"
 
 export function ellipseString(string = "", width = 4): string {
   return `${string.slice(0, width)}...${string.slice(-width)}`
@@ -39,4 +39,9 @@ export function numberToDecimal(num: number, decimals: number): number {
   const shifted_num = (num /= Math.pow(10, decimals))
   const shifted_num_string = shifted_num
   return shifted_num_string
+}
+
+export function calcExtraLogs(acctInfo: AccountInfo): number {
+  console.debug(acctInfo.amount, acctInfo["min-balance"])
+  return Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
 }

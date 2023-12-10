@@ -1,4 +1,4 @@
-import { createComputed, createMemo, createResource, createRoot, createSignal, on } from "solid-js"
+import { createComputed, createMemo, createRoot, createSignal, on } from "solid-js"
 import { AccountInfo, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
 import { BonfireAssetData } from "./types"
 import { numberToDecimal } from "./utilities"
@@ -9,9 +9,6 @@ import { Arc54Client } from "./Arc54Client"
 import { getApplicationAddress } from "algosdk"
 import { AppDetails } from "@algorandfoundation/algokit-utils/types/app-client"
 
-const APP_ID = 1011
-
-// The numbers in this type may need to be converted to BigInt in the library
 export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
   return {
     id: 0,
@@ -22,18 +19,32 @@ export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
     unitName: "ALGO",
     total: 10000000000000000,
     decimalAmount: numberToDecimal(amt, 6),
+    creator: "",
   }
 }
 
 function useBonfire() {
-  const [algoBalance, setAlgoBalance] = createSignal(0)
-  const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
-
   // Use reactive roots to compose app state
   const { address, transactionSigner } = UseSolidAlgoWallets
-  const { algodClient, getAccountInfo } = UseNetwork
+  const { algodClient, getAccountInfo, activeNetwork } = UseNetwork
+  const [algoBalance, setAlgoBalance] = createSignal(0)
+  const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
+  const [accountInfo, setAccountInfo] = createStore({} as AccountInfo)
+  const [bonfireInfo, setBonfireInfo] = createSignal({} as AccountInfo)
+  const [infoOpen, setInfoOpen] = createSignal(false)
+
+  const BONFIRE_APP_IDS = {
+    MainNet: 0,
+    TestNet: 0,
+    BetaNet: 0,
+    LocalNet: 1011,
+  }
+
+  console.debug(activeNetwork())
+  const bonfireAddr = createMemo(() => getApplicationAddress(BONFIRE_APP_IDS[activeNetwork()]))
 
   async function fetchAccountInfo() {
+    // Get connected address info
     // console.debug("fetchAccountInfo")
     const addr = address()
     // console.debug("addr: ", addr)
@@ -42,6 +53,7 @@ function useBonfire() {
       try {
         const info = await getAccountInfo(addr)
         // console.debug(info)
+        setAccountInfo(info)
         setAlgoBalance(info.amount)
         const assetsFromRes = info.assets
         // console.debug("Assets from response", assetsFromRes)
@@ -55,6 +67,7 @@ function useBonfire() {
             decimals: 0,
             total: 0,
             decimalAmount: 0,
+            creator: "",
           })),
         ]
         await Promise.all(
@@ -62,21 +75,26 @@ function useBonfire() {
             if (asset.id > 0) {
               // console.debug("Asset before: ", JSON.stringify(asset))
               const { params } = await algodClient().getAssetByID(asset.id).do()
-              // asset.idString = asset.id.toString()
               asset.name = params.name
               asset.unitName = params["unit-name"]
               asset.decimals = params.decimals
               asset.total = params.total
               asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+              asset.creator = params.creator
               // console.debug("Asset after: ", JSON.stringify(asset))
             }
           }),
         )
         console.debug("Assets array: ", assets)
         setAccountAssets(assets)
+
+        //Get Bonfire app info
+        const bonfireInfo = await algodClient().accountInformation(bonfireAddr()).do()
+        console.debug("bonfireInfo: ", bonfireInfo)
+        setBonfireInfo(bonfireInfo as AccountInfo)
       } catch (e) {
         setAccountAssets([makeAlgoAssetDataObj(0)])
-        console.error("Error fetching account assets: ", e)
+        console.error("Error fetching: ", e)
       }
     }
   }
@@ -85,7 +103,6 @@ function useBonfire() {
 
   const [sorting, setSorting] = createSignal<SortingState>([])
   const [rowSelection, setRowSelection] = createSignal({})
-  // createComputed(() => console.debug(rowSelection()))
 
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
 
@@ -93,54 +110,39 @@ function useBonfire() {
     addr: address(),
     signer: transactionSigner,
   }))
+  console.debug("appId: ", BONFIRE_APP_IDS[activeNetwork()])
   const appDetails = createMemo<AppDetails>(() => {
     return {
       sender: transactionSignerAccount(),
       resolveBy: "id",
-      id: APP_ID,
+      id: BONFIRE_APP_IDS[activeNetwork()],
     }
   })
   const bonfire = createMemo(() => new Arc54Client(appDetails(), algodClient()))
-  const bonfireAddr = getApplicationAddress(APP_ID)
-
-  async function getBonfireInfo(): Promise<AccountInfo> {
-    const accountInfo = await algodClient().accountInformation(bonfireAddr).do()
-    if (!accountInfo) {
-      throw new Error("Unable to get account information")
-    }
-    console.debug(accountInfo)
-    return accountInfo as AccountInfo
-  }
-
-  const [bonfireInfo, { refetch: refetchBonfireInfo }] = createResource(algodClient, getBonfireInfo)
 
   createComputed(
     on(
-      [address, algodClient],
+      [address, algodClient, confirmedTxn, activeNetwork],
       async () => {
-        // console.debug("address or algodClient changed")
         if (address() === "") {
           setAccountAssets([makeAlgoAssetDataObj(0)])
+          return
         } else {
           await fetchAccountInfo()
+          setRowSelection({})
         }
       },
       { defer: true },
     ),
   )
 
-  createComputed(
-    on([confirmedTxn], async () => {
-      fetchAccountInfo()
-      refetchBonfireInfo()
-    }),
-  )
-
   return {
-    APP_ID,
+    APP_IDS: BONFIRE_APP_IDS,
     bonfireAddr,
     algoBalance,
     setAlgoBalance,
+    accountInfo,
+    setAccountInfo,
     accountAssets,
     setAccountAssets,
     sorting,
@@ -152,8 +154,10 @@ function useBonfire() {
     transactionSignerAccount,
     bonfire,
     bonfireInfo,
-    refetchBonfireInfo,
+    // refetchBonfireInfo,
     fetchAccountInfo,
+    infoOpen,
+    setInfoOpen,
   }
 }
 export default createRoot(useBonfire)
