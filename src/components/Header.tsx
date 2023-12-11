@@ -8,21 +8,20 @@ export default function Header() {
   const { activeNetwork, setActiveNetwork, networkNames } = UseNetwork
   const { infoOpen, setInfoOpen } = useBonfire
   return (
-    <div class="flex flex-row items-center p-2 sm:px-4">
+    <div class="sticky top-0 z-50 flex flex-row items-center bg-base-300 p-2 sm:px-4">
       <div class="flex text-3xl sm:text-4xl">
         <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text font-bold text-transparent">
           Bonfire
         </h1>
       </div>
-
       <div class="grow" />
       <div class="flex gap-2">
         <button
-          class="btn btn-ghost"
+          class={infoOpen() ? `btn btn-outline` : `btn btn-ghost`}
           name="information"
           onClick={() => setInfoOpen(!infoOpen())}
         >
-          About
+          {infoOpen() ? "Close" : "About"}
           {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

@@ -35,7 +35,7 @@ function useBonfire() {
 
   const BONFIRE_APP_IDS = {
     MainNet: 0,
-    TestNet: 0,
+    TestNet: 497806551,
     BetaNet: 0,
     LocalNet: 1011,
   }

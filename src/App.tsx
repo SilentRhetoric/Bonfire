@@ -7,7 +7,7 @@ import Footer from "./components/Footer"
 const App: Component = () => {
   return (
     <ErrorBoundary fallback={(err, reset) => <div onClick={reset}>Error: {err.toString()}</div>}>
-      <div class="flex min-h-screen flex-col bg-gradient-to-b from-base-300 to-base-200">
+      <div class="flex flex-col">
         <Header />
         <Main />
         <Footer />

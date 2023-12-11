@@ -2,7 +2,7 @@ import algonode from "../assets/algonode.png"
 
 export default function Footer() {
   return (
-    <footer class="flex flex-col justify-center gap-2 p-4">
+    <footer class="flex w-full flex-col justify-center gap-2 bg-base-200 p-4">
       <a
         href="https://x.com/silentrhetoric"
         target="_blank"

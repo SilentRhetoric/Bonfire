@@ -72,11 +72,7 @@ export default function Main() {
 
         const closeRemainder = async (asset: BonfireAssetData) => {
           if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
-            const { params } = await algodClient().getAssetByID(asset.id).do()
-            // console.debug("Asset creator address: ", params.creator)
-            // console.debug("Sender address: ", address())
-            // console.debug("Creator addresses same?: ", params.creator === address())
-            if (params.creator == address()) {
+            if (asset.creator == address()) {
               return undefined
             } else return bonfireAddr()
           } else return undefined
@@ -143,8 +139,54 @@ export default function Main() {
     setWaitingDonate(false)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const group = () => {
+    let numTxns = 0
+    let numOptIns = 0
+    let fees = 0
+    let payment = 0
+    let mbrReduction = 0
+
+    const assetsToBurn: BonfireAssetData[] = []
+    Object.entries(rowSelection()).forEach(([k]) => {
+      assetsToBurn.push(accountAssets[Number(k)])
+    })
+
+    for (let i = 0; i < assetsToBurn.length; i++) {
+      numTxns = numTxns + 1
+      fees = fees + 1000
+      const asset = assetsToBurn[i]
+
+      if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
+        fees = fees + 2000
+        numTxns = numTxns + 1
+        numOptIns = numOptIns + 1
+      }
+
+      if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+        if (asset.creator !== address()) {
+          mbrReduction = mbrReduction + 0.1
+        }
+      }
+    }
+
+    const numMBRPayments =
+      numOptIns - Math.floor((bonfireInfo()!.amount - bonfireInfo()!["min-balance"]) / 100000)
+
+    payment = payment + numMBRPayments * 100000
+
+    const groupObj = {
+      numTxns,
+      numOptIns,
+      fees,
+      payment,
+      mbrReduction,
+    }
+    return groupObj
+  }
+
   return (
-    <main class="mb-auto">
+    <main class="mb-auto min-h-[calc(100vh-186px)] bg-gradient-to-b from-base-300 to-base-200">
       <div class="flex flex-col items-center justify-start p-4">
         <Show
           when={!infoOpen()}
@@ -156,14 +198,12 @@ export default function Main() {
               <div class="flex flex-col gap-1">
                 <For each={Object.values(walletInterfaces)}>
                   {(wallet) => (
-                    <div class="flex gap-1">
-                      <button
-                        class="btn btn-ghost w-60 bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 text-black"
-                        onClick={() => connectWallet(wallet)}
-                      >
-                        {wallet.image()}
-                      </button>
-                    </div>
+                    <button
+                      class="btn w-60 bg-base-content bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-black"
+                      onClick={() => connectWallet(wallet)}
+                    >
+                      {wallet.image()}
+                    </button>
                   )}
                 </For>
               </div>
@@ -177,12 +217,12 @@ export default function Main() {
                   <p>🪵</p>
                 </div>
                 <button
-                  class="btn btn-ghost btn-outline btn-lg w-1/2"
+                  class="btn btn-ghost w-1/2 enabled:bg-gradient-to-r enabled:from-red-500 enabled:via-orange-500 enabled:to-yellow-500 enabled:text-black"
                   onClick={() => burn()}
                   disabled={
                     activeWallet() === undefined || Object.entries(rowSelection()).length < 1
                   }
-                  name="Burn ASA"
+                  name="Burn"
                 >
                   <Show
                     when={waitingBurn()}
@@ -220,11 +260,11 @@ export default function Main() {
                     class="btn btn-ghost btn-sm m-1 w-40"
                     onClick={() => donateLogs()}
                     disabled={activeWallet() === undefined || numLogs() < 1}
-                    name="Donate extra logs"
+                    name="Donate logs"
                   >
                     <Show
                       when={waitingDonate()}
-                      fallback="Donate Extra Logs"
+                      fallback="Donate Logs (0.1A)"
                     >
                       <span class="loading loading-spinner" />
                     </Show>
@@ -269,6 +309,7 @@ export default function Main() {
               <div class="flex flex-col gap-2">
                 <h2 class="text-center text-2xl">Your Asset Holdings</h2>
                 <ASATable />
+                {/* <div>{JSON.stringify(group())}</div> */}
               </div>
             </div>
           </Show>
