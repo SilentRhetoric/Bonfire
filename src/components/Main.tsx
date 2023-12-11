@@ -8,7 +8,7 @@ import {
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { calcExtraLogs, ellipseString, makeIntegerAmount } from "../lib/utilities"
+import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
 import { BonfireAssetData } from "../lib/types"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import Info from "./Info"
@@ -29,6 +29,8 @@ export default function Main() {
     setConfirmedTxn,
     transactionSignerAccount,
     infoOpen,
+    group,
+    groupOverFull,
   } = useBonfire
   const extraLogs = createMemo(() => calcExtraLogs(bonfireInfo()))
   const [numLogs, setNumLogs] = createSignal(0)
@@ -41,78 +43,103 @@ export default function Main() {
     await new Promise((r) => setTimeout(r, 1000))
 
     setConfirmedTxn("")
-    const suggestedParams = await algodClient().getTransactionParams().do()
-    suggestedParams.flatFee = true
-    suggestedParams.fee = suggestedParams.minFee
-    console.debug("suggestedParams: ", suggestedParams)
 
-    console.debug("rowSelection: ", rowSelection())
-    const assetsToBurn: BonfireAssetData[] = []
-    Object.entries(rowSelection()).forEach(([k]) => {
-      assetsToBurn.push(accountAssets[Number(k)])
-    })
-    console.debug("assetsToBurn: ", assetsToBurn)
+    try {
+      const suggestedParams = await algodClient().getTransactionParams().do()
+      suggestedParams.flatFee = true
+      suggestedParams.fee = suggestedParams.minFee
+      console.debug("suggestedParams: ", suggestedParams)
 
-    if (assetsToBurn.length > 0) {
-      let slots = 0
-      let numOptInCalls = 0
-      const group = bonfire().compose()
+      console.debug("rowSelection: ", rowSelection())
+      const assetsToBurn: BonfireAssetData[] = []
+      Object.entries(rowSelection()).forEach(([k]) => {
+        assetsToBurn.push(accountAssets[Number(k)])
+      })
+      console.debug("assetsToBurn: ", assetsToBurn)
 
-      for (let i = 0; i < assetsToBurn.length; i++) {
-        const asset = assetsToBurn[i]
-        if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
-          console.debug("Adding app call to opt Bonfire into ASA ", asset.id)
-          group.arc54OptIntoAsa(
-            { asa: asset.id },
-            { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
-          )
-          numOptInCalls = numOptInCalls + 1
+      if (assetsToBurn.length > 0) {
+        let slots = 0
+        let numOptInCalls = 0
+        const optInAssets = []
+        const axfers = []
+        const group = bonfire().compose()
+
+        for (let i = 0; i < assetsToBurn.length; i++) {
+          const asset = assetsToBurn[i]
+          if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
+            console.debug("Adding app call to opt Bonfire into ASA ", asset.id)
+            // group.arc54OptIntoAsa(
+            //   { asa: asset.id },
+            //   { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
+            // )
+            optInAssets.push(asset.id)
+            numOptInCalls = numOptInCalls + 1
+            slots = slots + 1
+          }
+
+          const closeRemainder = async (asset: BonfireAssetData) => {
+            if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+              if (asset.creator == address()) {
+                return undefined
+              } else return bonfireAddr()
+            } else return undefined
+          }
+          const closeRemainderAddr = await closeRemainder(asset)
+          console.debug("closeRemainderAddr: ", closeRemainderAddr)
+
+          const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
+            from: address(),
+            to: bonfireAddr(),
+            assetIndex: asset.id,
+            amount: makeIntegerAmount(asset.decimalAmount, asset),
+            closeRemainderTo: closeRemainderAddr,
+            suggestedParams,
+          })
+          console.debug("axfer: ", axfer.prettyPrint())
+          axfers.push(axfer)
+          // group.addTransaction(axfer)
           slots = slots + 1
         }
 
-        const closeRemainder = async (asset: BonfireAssetData) => {
-          if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
-            if (asset.creator == address()) {
-              return undefined
-            } else return bonfireAddr()
-          } else return undefined
+        const extraLogs = calcExtraLogs(bonfireInfo())
+
+        const numMBRPayments = numOptInCalls - extraLogs
+        console.debug("numMBRPayments: ", numMBRPayments)
+
+        if (numMBRPayments > 0) {
+          const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
+            from: address(),
+            to: bonfireAddr(),
+            amount: 100000 * numMBRPayments,
+            suggestedParams,
+          })
+          console.debug("payTxn: ", payTxn.prettyPrint())
+          group.addTransaction(payTxn)
         }
-        const closeRemainderAddr = await closeRemainder(asset)
-        console.debug("closeRemainderAddr: ", closeRemainderAddr)
 
-        const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
-          from: address(),
-          to: bonfireAddr(),
-          assetIndex: asset.id,
-          amount: makeIntegerAmount(asset.decimalAmount, asset),
-          closeRemainderTo: closeRemainderAddr,
-          suggestedParams,
+        // Now add optIn calls after payment is made to the contract account
+        optInAssets.forEach((id) =>
+          group.arc54OptIntoAsa(
+            { asa: id },
+            { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
+          ),
+        )
+
+        // Now add asset transfers
+        axfers.forEach((txn) => {
+          group.addTransaction(txn)
         })
-        group.addTransaction(axfer)
-        slots = slots + 1
+
+        console.debug("Transaction group: ", group)
+
+        // Sign & send the transaction group
+        const result = await group.execute()
+        console.debug("Txn confirmed result: ", result)
+        setConfirmedTxn(result.txIds[0])
+        setWaitingBurn(false)
       }
-
-      const numMBRPayments =
-        numOptInCalls - Math.floor((bonfireInfo()!.amount - bonfireInfo()!["min-balance"]) / 100000)
-      console.debug("numMBRPayments: ", numMBRPayments)
-
-      if (numMBRPayments > 0) {
-        const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
-          from: address(),
-          to: bonfireAddr(),
-          amount: 100000 * numMBRPayments,
-          suggestedParams,
-        })
-        group.addTransaction(payTxn)
-      }
-
-      console.debug(group)
-
-      // Sign & send the transaction group
-      const result = await group.execute()
-      console.debug("Txn confirmed result: ", result)
-      setConfirmedTxn(result.txIds[0])
-      setWaitingBurn(false)
+    } catch (e) {
+      console.error("Error sending transaction: ", e)
     }
   }
 
@@ -137,52 +164,6 @@ export default function Main() {
     console.debug("Txn confirmed: ", result)
     setConfirmedTxn(result.txIDs[0])
     setWaitingDonate(false)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const group = () => {
-    let numTxns = 0
-    let numOptIns = 0
-    let fees = 0
-    let payment = 0
-    let mbrReduction = 0
-
-    const assetsToBurn: BonfireAssetData[] = []
-    Object.entries(rowSelection()).forEach(([k]) => {
-      assetsToBurn.push(accountAssets[Number(k)])
-    })
-
-    for (let i = 0; i < assetsToBurn.length; i++) {
-      numTxns = numTxns + 1
-      fees = fees + 1000
-      const asset = assetsToBurn[i]
-
-      if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
-        fees = fees + 2000
-        numTxns = numTxns + 1
-        numOptIns = numOptIns + 1
-      }
-
-      if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
-        if (asset.creator !== address()) {
-          mbrReduction = mbrReduction + 0.1
-        }
-      }
-    }
-
-    const numMBRPayments =
-      numOptIns - Math.floor((bonfireInfo()!.amount - bonfireInfo()!["min-balance"]) / 100000)
-
-    payment = payment + numMBRPayments * 100000
-
-    const groupObj = {
-      numTxns,
-      numOptIns,
-      fees,
-      payment,
-      mbrReduction,
-    }
-    return groupObj
   }
 
   return (
@@ -210,8 +191,8 @@ export default function Main() {
             }
           >
             <div class="flex flex-col gap-4 md:flex-row md:gap-8">
-              <div class="flex flex-col items-center gap-4">
-                <div class="grid grid-cols-1 grid-rows-1 flex-col text-9xl">
+              <div class="flex flex-col items-center gap-2 md:w-1/2">
+                <div class="grid grid-cols-1 grid-rows-1 flex-col pt-2 text-9xl">
                   <p class="fade-element col-start-1 row-start-1 -scale-x-100">🔥</p>
                   <p class="fade-element col-start-1 row-start-1">🔥</p>
                   <p>🪵</p>
@@ -220,7 +201,9 @@ export default function Main() {
                   class="btn btn-ghost w-1/2 enabled:bg-gradient-to-r enabled:from-red-500 enabled:via-orange-500 enabled:to-yellow-500 enabled:text-black"
                   onClick={() => burn()}
                   disabled={
-                    activeWallet() === undefined || Object.entries(rowSelection()).length < 1
+                    activeWallet() === undefined ||
+                    Object.entries(rowSelection()).length < 1 ||
+                    groupOverFull()
                   }
                   name="Burn"
                 >
@@ -240,9 +223,9 @@ export default function Main() {
                     <p>ASAshes: {bonfireInfo()?.assets.length}</p>
                   </div>
                 </Show>
-                <div class="flex flex-row items-center gap-2">
+                <div class="flex flex-row items-center justify-center gap-2">
                   <input
-                    class="input input-sm w-20 text-right"
+                    class="input w-20 text-right"
                     type="number"
                     name="Number of logs"
                     aria-label="Number of logs"
@@ -257,14 +240,14 @@ export default function Main() {
                     }}
                   />
                   <button
-                    class="btn btn-ghost btn-sm m-1 w-40"
+                    class="btn btn-ghost m-1 grow"
                     onClick={() => donateLogs()}
                     disabled={activeWallet() === undefined || numLogs() < 1}
                     name="Donate logs"
                   >
                     <Show
                       when={waitingDonate()}
-                      fallback="Donate Logs (0.1A)"
+                      fallback="Donate Logs x 0.1A"
                     >
                       <span class="loading loading-spinner" />
                     </Show>
@@ -275,7 +258,7 @@ export default function Main() {
                   fallback={null}
                 >
                   <button
-                    class="btn btn-ghost btn-sm"
+                    class="btn btn-ghost"
                     disabled={confirmedTxn().length === 0}
                   >
                     <a
@@ -306,9 +289,13 @@ export default function Main() {
                   </button>
                 </Show>
               </div>
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 md:w-1/2">
                 <h2 class="text-center text-2xl">Your Asset Holdings</h2>
                 <ASATable />
+                <div class="flex flex-row justify-between gap-2 text-sm">
+                  <p>Total Cost: {numberToDecimal(group().fees + group().payment, 6)}A</p>
+                  <p>MBR Recovery: {numberToDecimal(group().mbrReduction, 6)}</p>
+                </div>
                 {/* <div>{JSON.stringify(group())}</div> */}
               </div>
             </div>

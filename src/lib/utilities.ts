@@ -43,5 +43,8 @@ export function numberToDecimal(num: number, decimals: number): number {
 
 export function calcExtraLogs(acctInfo: AccountInfo): number {
   console.debug(acctInfo.amount, acctInfo["min-balance"])
-  return Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
+  const extraLogs = Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
+  if (extraLogs <= 0) {
+    return 0
+  } else return extraLogs
 }

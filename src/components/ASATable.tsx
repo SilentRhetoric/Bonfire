@@ -30,6 +30,8 @@ const IndeterminateCheckbox: Component<{
     }
   })
 
+  // const { groupFull, groupOverFull } = useBonfire
+
   return (
     <input
       type="checkbox"
@@ -37,6 +39,7 @@ const IndeterminateCheckbox: Component<{
       class={"checkbox"}
       name="Select asset"
       aria-label="Select asset"
+      // disabled={groupFull() || groupOverFull()}
       {...props}
     />
   )
@@ -97,7 +100,7 @@ export const ASATable: Component = () => {
 
         // When the input is blurred, we'll call our table meta's updateData function
         const onBlur = () => {
-          if (0 < value() && value() <= c.row.original.decimalAmount) {
+          if (0 < value() && value() <= c.row.original.amount) {
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
           } else {
             c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
@@ -204,12 +207,12 @@ export const ASATable: Component = () => {
   })
 
   return (
-    <div class="max-h-[432px] overflow-y-auto">
+    <div class="max-h-[400px] overflow-y-auto">
       <table class="table table-pin-rows table-xs">
-        <thead class="text text-base text-base-content">
+        <thead class="text-base text-base-content">
           <For each={table().getHeaderGroups()}>
             {(headerGroup) => (
-              <tr class="bg-transparent">
+              <tr class="bg-base-200">
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>

@@ -1,7 +1,7 @@
 import { createComputed, createMemo, createRoot, createSignal, on } from "solid-js"
 import { AccountInfo, UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
 import { BonfireAssetData } from "./types"
-import { numberToDecimal } from "./utilities"
+import { calcExtraLogs, makeIntegerAmount, numberToDecimal } from "./utilities"
 import { createStore } from "solid-js/store"
 import { SortingState } from "@tanstack/solid-table"
 import { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account"
@@ -136,6 +136,68 @@ function useBonfire() {
     ),
   )
 
+  const group = createMemo(() => {
+    let numTxns = 0
+    let numOptIns = 0
+    let fees = 0
+    let payment = 0
+    let mbrReduction = 0
+
+    const assetsToBurn: BonfireAssetData[] = []
+    Object.entries(rowSelection()).forEach(([k]) => {
+      assetsToBurn.push(accountAssets[Number(k)])
+    })
+
+    for (let i = 0; i < assetsToBurn.length; i++) {
+      numTxns = numTxns + 1
+      fees = fees + 1000
+      const asset = assetsToBurn[i]
+
+      if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
+        fees = fees + 2000
+        numTxns = numTxns + 1
+        numOptIns = numOptIns + 1
+      }
+
+      if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+        if (asset.creator !== address()) {
+          mbrReduction = mbrReduction + 0.1
+        }
+      }
+    }
+    const extraLogs = calcExtraLogs(bonfireInfo())
+    const numMBRPayments = Math.max(numOptIns - extraLogs, 0)
+    console.debug(extraLogs, numMBRPayments)
+    if (numMBRPayments > 0) {
+      payment = payment + numMBRPayments * 100000
+      numTxns = numTxns + 1
+    }
+
+    const groupObj = {
+      numTxns,
+      numOptIns,
+      fees,
+      payment,
+      mbrReduction,
+    }
+    return groupObj
+  })
+
+  const groupFull = createMemo(() => {
+    if (group().numTxns == 16) {
+      return true
+    } else if (group().payment + group().fees >= algoBalance()) {
+      return true
+    } else return false
+  })
+  const groupOverFull = createMemo(() => {
+    if (group().numTxns > 16) {
+      return true
+    } else if (group().payment + group().fees > algoBalance()) {
+      return true
+    } else return false
+  })
+
   return {
     APP_IDS: BONFIRE_APP_IDS,
     bonfireAddr,
@@ -158,6 +220,9 @@ function useBonfire() {
     fetchAccountInfo,
     infoOpen,
     setInfoOpen,
+    group,
+    groupFull,
+    groupOverFull,
   }
 }
 export default createRoot(useBonfire)
