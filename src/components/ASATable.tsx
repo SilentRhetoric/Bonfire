@@ -48,7 +48,7 @@ const IndeterminateCheckbox: Component<{
 export const ASATable: Component = () => {
   const { accountAssets, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
     useBonfire
-  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0)])
+  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
 
   // createComputed(() => console.debug("accountAsssets in component: ", accountAssets))
 
@@ -207,7 +207,7 @@ export const ASATable: Component = () => {
   })
 
   return (
-    <div class="max-h-[400px] overflow-y-auto">
+    <div class="max-h-[400px] min-w-[200px] overflow-y-auto">
       <table class="table table-pin-rows table-xs">
         <thead class="text-base text-base-content">
           <For each={table().getHeaderGroups()}>

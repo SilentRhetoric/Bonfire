@@ -2,7 +2,7 @@
 
 # Bonfire 🔥
 
-Bonfire is a tool for burning Algorand tokens. The live web app can be found at [https://asa-bonfire.netlify.app](https://asa-bonfire.netlify.app).
+Bonfire is a tool for burning Algorand Standard Assets (ASA). The live web app can be found at [https://asa-bonfire.netlify.app](https://asa-bonfire.netlify.app).
 
 The app utilizes [SolidJS](https://www.solidjs.com) for reactivity, [Vite](https://vitejs.dev) dev tooling, [Tailwind CSS](https://tailwindcss.com) styles, and [daisyUI](https://daisyui.com) components.
 
@@ -15,12 +15,11 @@ standardized way per the [ARC-54](https://arc.algorand.foundation/ARCs/arc-0054)
 
 ## Why is Bonfire useful?
 
-Standardizing token burns enables explorers, DeFi metrics, and other tools in the ecosystem
-to subtract ASAs burned here from measures of token supply.
+Standardizing ASA burns enables explorers, DeFi metrics, and other tools in the ecosystem to subtract assets burned here from measures of supply.
 
 ## How to use Bonfire
 
-The app displays a list of your Algorand Standard Asset (ASAs) holdings.
+The app displays a list of your ASA holdings.
 
 1. Select the asset rows you want to burn. You can edit the amount if you want to burn less than your total holding of an asset.
 2. When your wallet is open and ready to sign the transactions, click the Burn button.
@@ -28,9 +27,7 @@ The app displays a list of your Algorand Standard Asset (ASAs) holdings.
 
 ## When can Bonfire be used?
 
-Anytime you want to permanently burn ASAs Bonfire can help. This could be to clear tokens
-out of an account without sending them back to their creators. Or, if you want to remove
-tokens from circulating supply, the Bonfire smart contract is the standard place to do so. Note that ASAs with clawback enabled can never be permanently burned.
+Anytime you want to permanently burn ASAs Bonfire can help. This could be to clear assets out of an account without sending them back to their creators. Or, if you want to remove assets from available and/or circulating supply, the Bonfire smart contract is the standard place to do so. Note that ASAs with clawback enabled can never be permanently burned.
 
 ## Who can use Bonfire?
 
@@ -40,17 +37,11 @@ by clicking the "Install Bonfire" button on the right side of the address bar.
 
 ## Smart contract design
 
-The smart contract used for burning is documented in the [ARC-54](https://arc.algorand.foundation/ARCs/arc-0054) standard. It is an application with a single method that requests the app opt into any ASA.
-Anyone can call this method at any time for any ASA, and the app will opt in as long as the
-opt in fee is covered by the caller and the application account has sufficient Algo balance
-to cover the increased Minimum Balance Requirement (MBR). Note that the smart contract can
-also be called by other smart contracts, if desired.
+The smart contract used for burning is documented in the [ARC-54](https://arc.algorand.foundation/ARCs/arc-0054) standard. It is an application with a single method that requests the app opt into any ASA. Anyone can call this method at any time for any ASA, and the app will opt in as long as the opt in fee is covered by the caller and the application account has sufficient Algo balance to cover the increased Minimum Balance Requirement (MBR). Note that the smart contract can also be called by other smart contracts, if desired.
 
 ## Interface design
 
-The user interface is designed to make it easy for people to burn one or multiple ASAs. For each ASA selected, the app will prepare the necessary transactions. If the Bonfire smart contract has not yet opted into the ASA to be burned, an app call will be added to your transaction group. If the Bonfire smart contract needs additional MBR to cover the opt-in, a
-payment will be added to your transaction group with just enough Algos to cover the
-contract's MBR needs.
+The user interface is designed to make it easy for people to burn one or multiple ASAs. For each ASA selected, the app will prepare the necessary transactions. If the Bonfire smart contract has not yet opted into the ASA to be burned, an app call will be added to your transaction group. If the Bonfire smart contract needs additional MBR to cover the opt-in, a payment will be added to your transaction group with just enough Algos to cover the contract's MBR needs. The interface will display reductions in your account's MBR less the cost of burning and the net effect on your available Algo balance after burning.
 
 ## Pay it forward
 

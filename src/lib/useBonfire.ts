@@ -75,6 +75,7 @@ function useBonfire() {
             if (asset.id > 0) {
               // console.debug("Asset before: ", JSON.stringify(asset))
               const { params } = await algodClient().getAssetByID(asset.id).do()
+              console.debug("params: ", params)
               asset.name = params.name
               asset.unitName = params["unit-name"]
               asset.decimals = params.decimals
@@ -125,11 +126,12 @@ function useBonfire() {
       [address, algodClient, confirmedTxn, activeNetwork],
       async () => {
         if (address() === "") {
+          setRowSelection({})
           setAccountAssets([makeAlgoAssetDataObj(0)])
           return
         } else {
-          await fetchAccountInfo()
           setRowSelection({})
+          await fetchAccountInfo()
         }
       },
       { defer: true },
@@ -143,35 +145,38 @@ function useBonfire() {
     let payment = 0
     let mbrReduction = 0
 
-    const assetsToBurn: BonfireAssetData[] = []
-    Object.entries(rowSelection()).forEach(([k]) => {
-      assetsToBurn.push(accountAssets[Number(k)])
-    })
+    if (Object.entries(rowSelection()).length > 0) {
+      const assetsToBurn: BonfireAssetData[] = []
+      Object.entries(rowSelection()).forEach(([k]) => {
+        assetsToBurn.push(accountAssets[Number(k)])
+      })
 
-    for (let i = 0; i < assetsToBurn.length; i++) {
-      numTxns = numTxns + 1
-      fees = fees + 1000
-      const asset = assetsToBurn[i]
-
-      if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
-        fees = fees + 2000
+      for (let i = 0; i < assetsToBurn.length; i++) {
         numTxns = numTxns + 1
-        numOptIns = numOptIns + 1
-      }
+        fees = fees + 1000
+        const asset = assetsToBurn[i]
 
-      if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
-        if (asset.creator !== address()) {
-          mbrReduction = mbrReduction + 0.1
+        if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
+          fees = fees + 2000
+          numTxns = numTxns + 1
+          numOptIns = numOptIns + 1
+        }
+
+        if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+          if (asset.creator !== address()) {
+            mbrReduction = mbrReduction + 100000
+          }
         }
       }
+      const extraLogs = calcExtraLogs(bonfireInfo())
+      const numMBRPayments = Math.max(numOptIns - extraLogs, 0)
+      console.debug(extraLogs, numMBRPayments)
+      if (numMBRPayments > 0) {
+        payment = payment + numMBRPayments * 100000
+        numTxns = numTxns + 1
+      }
     }
-    const extraLogs = calcExtraLogs(bonfireInfo())
-    const numMBRPayments = Math.max(numOptIns - extraLogs, 0)
-    console.debug(extraLogs, numMBRPayments)
-    if (numMBRPayments > 0) {
-      payment = payment + numMBRPayments * 100000
-      numTxns = numTxns + 1
-    }
+    const net = mbrReduction - payment - fees
 
     const groupObj = {
       numTxns,
@@ -179,14 +184,15 @@ function useBonfire() {
       fees,
       payment,
       mbrReduction,
+      net,
     }
     return groupObj
   })
 
   const groupFull = createMemo(() => {
-    if (group().numTxns == 16) {
+    if (group()?.numTxns == 16) {
       return true
-    } else if (group().payment + group().fees >= algoBalance()) {
+    } else if (group()?.payment + group()?.fees >= algoBalance()) {
       return true
     } else return false
   })

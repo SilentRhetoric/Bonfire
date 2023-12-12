@@ -4,8 +4,8 @@ export default function Info() {
       <h2>About Bonfire</h2>
       <h3>What is Bonfire?</h3>
       <p>
-        Bonfire is an interface for burning Algorand ASAs in a permissionless, verifiable, and
-        standardized way per the{" "}
+        Bonfire is an interface for burning Algorand Standard Assets (ASA) in a permissionless,
+        verifiable, and standardized way per the{" "}
         <a
           href="https://arc.algorand.foundation/ARCs/arc-0054"
           target="_blank"
@@ -18,11 +18,14 @@ export default function Info() {
       </p>
       <h3>Why is Bonfire useful?</h3>
       <p>
-        Standardizing token burns enables explorers, DeFi metrics, and other tools in the ecosystem
-        to subtract ASAs burned here from measures of token supply.
+        Standardizing ASA burns enables explorers, DeFi metrics, and other tools in the ecosystem to
+        subtract assets burned here from measures of supply.
       </p>
       <h3>How to use Bonfire</h3>
-      <p>The app displays a list of your Algorand Standard Asset (ASAs) holdings.</p>
+      <p>
+        The app displays a list of your ASA holdings that can be burned and are not frozen in your
+        account.
+      </p>
       <ol>
         <li>
           Select the asset rows you want to burn. You can edit the amount if you want to burn less
@@ -36,11 +39,11 @@ export default function Info() {
       </ol>
       <h3>When can Bonfire be used?</h3>
       <p>
-        Anytime you want to permanently burn ASAs Bonfire can help. This could be to clear tokens
+        Anytime you want to permanently burn ASAs Bonfire can help. This could be to clear assets
         out of an account without sending them back to their creators. Or, if you want to remove
-        tokens from circulating supply (provided they do not have clawback enabled), the Bonfire
-        smart contract is the standard place to do so. Note that ASAs with clawback enabled can
-        never be permanently burned.
+        assets from available and/or circulating supply (provided they do not have clawback
+        enabled), the Bonfire smart contract is the standard place to do so. Note that ASAs with
+        clawback enabled can never be permanently burned.
       </p>
       <h3>Who can use Bonfire?</h3>
       <p>
@@ -62,8 +65,8 @@ export default function Info() {
         standard. It is an application with a single method that requests the app opt into any ASA.
         Anyone can call this method at any time for any ASA, and the app will opt in as long as the
         opt in fee is covered by the caller and the application account has sufficient Algo balance
-        to cover the increased Minimum Balance Requirement (MBR). Note that the smart contract can
-        also be called by other smart contracts, if desired.
+        to cover the increased Minimum Balance Requirement (MBR) required to hold the ASA. Note that
+        the smart contract can also be called by other smart contracts, if desired.
       </p>
       <h3>Interface design</h3>
       <p>
@@ -72,7 +75,8 @@ export default function Info() {
         contract has not yet opted into the ASA to be burned, an app call will be added to your
         transaction group. If the Bonfire smart contract needs additional MBR to cover the opt-in, a
         payment will be added to your transaction group with just enough Algos to cover the
-        contract's MBR needs.
+        contract's MBR needs. The interface will display reductions in your account's MBR less the
+        cost of burning and the net effect on your available Algo balance after burning.
       </p>
       <h3>Pay it forward</h3>
       <p>

@@ -198,7 +198,7 @@ export default function Main() {
                   <p>🪵</p>
                 </div>
                 <button
-                  class="btn btn-ghost w-1/2 enabled:bg-gradient-to-r enabled:from-red-500 enabled:via-orange-500 enabled:to-yellow-500 enabled:text-black"
+                  class="btn btn-ghost w-1/3 enabled:bg-gradient-to-r enabled:from-red-500 enabled:via-orange-500 enabled:to-yellow-500 enabled:text-black"
                   onClick={() => burn()}
                   disabled={
                     activeWallet() === undefined ||
@@ -218,12 +218,12 @@ export default function Main() {
                   when={bonfireInfo()?.assets !== undefined}
                   fallback={null}
                 >
-                  <div class="flex flex-row gap-16">
+                  <div class="flex flex-row justify-evenly gap-4">
                     <p>Extra Logs: {extraLogs()}</p>
                     <p>ASAshes: {bonfireInfo()?.assets.length}</p>
                   </div>
                 </Show>
-                <div class="flex flex-row items-center justify-center gap-2">
+                <div class="flex flex-row items-center justify-center gap-4">
                   <input
                     class="input w-20 text-right"
                     type="number"
@@ -240,15 +240,13 @@ export default function Main() {
                     }}
                   />
                   <button
-                    class="btn btn-ghost m-1 grow"
+                    class="btn btn-ghost flex w-40 flex-row whitespace-nowrap"
                     onClick={() => donateLogs()}
                     disabled={activeWallet() === undefined || numLogs() < 1}
                     name="Donate logs"
                   >
-                    <Show
-                      when={waitingDonate()}
-                      fallback="Donate Logs x 0.1A"
-                    >
+                    Donate Logs x 0.1A
+                    <Show when={waitingDonate()}>
                       <span class="loading loading-spinner" />
                     </Show>
                   </button>
@@ -258,7 +256,7 @@ export default function Main() {
                   fallback={null}
                 >
                   <button
-                    class="btn btn-ghost"
+                    class="w-66 btn btn-ghost"
                     disabled={confirmedTxn().length === 0}
                   >
                     <a
@@ -290,11 +288,14 @@ export default function Main() {
                 </Show>
               </div>
               <div class="flex flex-col gap-2 md:w-1/2">
-                <h2 class="text-center text-2xl">Your Asset Holdings</h2>
+                <h2 class="text-center text-2xl">Your Burnable Assets</h2>
                 <ASATable />
-                <div class="flex flex-row justify-between gap-2 text-sm">
-                  <p>Total Cost: {numberToDecimal(group().fees + group().payment, 6)}A</p>
-                  <p>MBR Recovery: {numberToDecimal(group().mbrReduction, 6)}</p>
+                <div class="flex flex-row justify-center gap-1 text-xs">
+                  <p>Reduce MBR {numberToDecimal(group().mbrReduction, 6)}A</p>
+                  <p>-</p>
+                  <p>Burn Cost {numberToDecimal(group().fees + group().payment, 6)}A</p>
+                  <p>=</p>
+                  <p>{numberToDecimal(group().net, 6)}A</p>
                 </div>
                 {/* <div>{JSON.stringify(group())}</div> */}
               </div>
