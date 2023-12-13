@@ -40,8 +40,6 @@ export default function Main() {
   // eslint-disable-next-line no-unused-vars
   async function burn() {
     setWaitingBurn(true)
-    await new Promise((r) => setTimeout(r, 1000))
-
     setConfirmedTxn("")
 
     try {
@@ -145,8 +143,6 @@ export default function Main() {
 
   async function donateLogs() {
     setWaitingDonate(true)
-    await new Promise((r) => setTimeout(r, 1000))
-
     setConfirmedTxn("")
     const suggestedParams = await algodClient().getTransactionParams().do()
 
