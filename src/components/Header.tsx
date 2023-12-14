@@ -47,7 +47,7 @@ export default function Header() {
               {activeNetwork()[0]}
             </div>
             <ul class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2">
-              <For each={networkNames.filter((n) => n == "TestNet" || n == "LocalNet")}>
+              <For each={networkNames}>
                 {(network) => (
                   <li>
                     <button
