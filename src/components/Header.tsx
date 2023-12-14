@@ -9,10 +9,11 @@ export default function Header() {
   const { infoOpen, setInfoOpen } = useBonfire
   return (
     <div class="sticky top-0 z-50 flex flex-row items-center bg-base-300 p-2 sm:px-4">
-      <div class="flex text-3xl sm:text-4xl">
-        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text font-bold text-transparent">
+      <div class="flex items-end">
+        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
           Bonfire
         </h1>
+        <p class="text-xs">Beta</p>
       </div>
       <div class="grow" />
       <div class="flex gap-2">
@@ -47,7 +48,7 @@ export default function Header() {
               {activeNetwork()[0]}
             </div>
             <ul class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2">
-              <For each={networkNames}>
+              <For each={networkNames.filter((n) => n === "TestNet" || n === "LocalNet")}>
                 {(network) => (
                   <li>
                     <button

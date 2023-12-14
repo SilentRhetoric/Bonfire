@@ -291,7 +291,7 @@ export default function Main() {
                   <p>-</p>
                   <p>Burn Cost {numberToDecimal(group().fees + group().payment, 6)}A</p>
                   <p>=</p>
-                  <p>{numberToDecimal(group().net, 6)}A</p>
+                  <p>{numberToDecimal(group().net, 6)}A Net</p>
                 </div>
                 {/* <div>{JSON.stringify(group())}</div> */}
               </div>
