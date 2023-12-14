@@ -11,8 +11,13 @@
       "jsx": true
     }
   },
-  "plugins": ["solid"],
-  "extends": ["eslint:recommended", "plugin:solid/typescript"]
+  "plugins": ["solid", "@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:solid/typescript"
+  ],
+  "root": true
 }
 
 // https://github.com/solidjs-community/eslint-plugin-solid
