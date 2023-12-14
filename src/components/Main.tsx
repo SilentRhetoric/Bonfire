@@ -163,7 +163,7 @@ export default function Main() {
   }
 
   return (
-    <main class="mb-auto min-h-[calc(100vh-186px)] bg-gradient-to-b from-base-300 to-base-200">
+    <main class="mb-auto min-h-[calc(100vh-234px)] bg-gradient-to-b from-base-300 to-base-200">
       <div class="flex flex-col items-center justify-start p-4">
         <Show
           when={!infoOpen()}
