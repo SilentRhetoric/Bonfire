@@ -1,7 +1,7 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
-  "description": "",
+  "name": "bonfire",
+  "version": "0.0.1",
+  "description": "A communal bonfire for verifiably burning Algorand Standard Assets",
   "scripts": {
     "start": "vite",
     "dev": "vite",
@@ -25,8 +25,9 @@
     "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
-    "vite-plugin-solid": "^2.7.2",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite-plugin-cdn-import": "^0.3.5",
+    "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-solid": "^2.7.2"
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^5.0.1",

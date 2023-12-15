@@ -1,6 +1,7 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import eslint from "vite-plugin-eslint"
+import importToCDN from "vite-plugin-cdn-import"
 // import devtools from 'solid-devtools/vite';
 
 export default defineConfig({
@@ -12,6 +13,9 @@ export default defineConfig({
     // devtools(),
     solidPlugin(),
     eslint(),
+    importToCDN({
+      modules: [{ name: "algosdk", var: "algosdk", path: "dist/browser/algosdk.min.js" }],
+    }),
   ],
   server: {
     port: 3000,
