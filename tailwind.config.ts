@@ -9,6 +9,7 @@ const config: Config = {
       // Creating a custom theme starting by spreading the built-in theme
       {
         bonfire: {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
           ...require("daisyui/src/theming/themes")["luxury"],
           "base-content": "#ffa200",
         },

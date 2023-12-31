@@ -16,6 +16,11 @@ export default function Info() {
         </a>{" "}
         standard.
       </p>
+      <b>
+        IMPORTANT: While Bonfire is in Beta and ARC-54 is still in Draft status, assets burned here
+        may not conform to the eventual standard. Do not use the app to burn assets for any official
+        purpose until the ARC is finalized and Bonfire is out of Beta.
+      </b>
       <h3>Why is Bonfire useful?</h3>
       <p>
         Standardizing ASA burns enables explorers, DeFi metrics, and other tools in the ecosystem to

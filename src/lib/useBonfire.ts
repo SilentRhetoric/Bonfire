@@ -9,6 +9,13 @@ import { Arc54Client } from "./Arc54Client"
 import { getApplicationAddress } from "algosdk"
 import { AppDetails } from "@algorandfoundation/algokit-utils/types/app-client"
 
+export const BONFIRE_APP_IDS = {
+  MainNet: 1305959747,
+  TestNet: 497806551,
+  BetaNet: 2019020358,
+  LocalNet: 1011,
+}
+
 export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
   return {
     id: 0,
@@ -32,15 +39,10 @@ function useBonfire() {
   const [accountInfo, setAccountInfo] = createStore({} as AccountInfo)
   const [bonfireInfo, setBonfireInfo] = createSignal({} as AccountInfo)
   const [infoOpen, setInfoOpen] = createSignal(false)
+  const [sorting, setSorting] = createSignal<SortingState>([])
+  const [rowSelection, setRowSelection] = createSignal({})
+  const [confirmedTxn, setConfirmedTxn] = createSignal("")
 
-  const BONFIRE_APP_IDS = {
-    MainNet: 0,
-    TestNet: 497806551,
-    BetaNet: 0,
-    LocalNet: 1011,
-  }
-
-  console.debug(activeNetwork())
   const bonfireAddr = createMemo(() => getApplicationAddress(BONFIRE_APP_IDS[activeNetwork()]))
 
   async function fetchAccountInfo() {
@@ -75,7 +77,7 @@ function useBonfire() {
             if (asset.id > 0) {
               // console.debug("Asset before: ", JSON.stringify(asset))
               const { params } = await algodClient().getAssetByID(asset.id).do()
-              console.debug("params: ", params)
+              // console.debug("params: ", params)
               asset.name = params.name
               asset.unitName = params["unit-name"]
               asset.decimals = params.decimals
@@ -86,32 +88,25 @@ function useBonfire() {
             }
           }),
         )
-        console.debug("Assets array: ", assets)
+        // console.debug("Assets array: ", assets)
         setAccountAssets(assets)
 
         //Get Bonfire app info
         const bonfireInfo = await algodClient().accountInformation(bonfireAddr()).do()
-        console.debug("bonfireInfo: ", bonfireInfo)
+        // console.debug("bonfireInfo: ", bonfireInfo)
         setBonfireInfo(bonfireInfo as AccountInfo)
       } catch (e) {
         setAccountAssets([makeAlgoAssetDataObj(0)])
-        console.error("Error fetching: ", e)
+        console.error("Error fetching account info: ", e)
       }
     }
   }
-
-  createComputed(() => console.debug("Store updated: ", ...accountAssets))
-
-  const [sorting, setSorting] = createSignal<SortingState>([])
-  const [rowSelection, setRowSelection] = createSignal({})
-
-  const [confirmedTxn, setConfirmedTxn] = createSignal("")
 
   const transactionSignerAccount = createMemo<TransactionSignerAccount>(() => ({
     addr: address(),
     signer: transactionSigner,
   }))
-  console.debug("appId: ", BONFIRE_APP_IDS[activeNetwork()])
+
   const appDetails = createMemo<AppDetails>(() => {
     return {
       sender: transactionSignerAccount(),
@@ -119,6 +114,7 @@ function useBonfire() {
       id: BONFIRE_APP_IDS[activeNetwork()],
     }
   })
+
   const bonfire = createMemo(() => new Arc54Client(appDetails(), algodClient()))
 
   createComputed(
@@ -170,7 +166,7 @@ function useBonfire() {
       }
       const extraLogs = calcExtraLogs(bonfireInfo())
       const numMBRPayments = Math.max(numOptIns - extraLogs, 0)
-      console.debug(extraLogs, numMBRPayments)
+      // console.debug(extraLogs, numMBRPayments)
       if (numMBRPayments > 0) {
         payment = payment + numMBRPayments * 100000
         numTxns = numTxns + 1

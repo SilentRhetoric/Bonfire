@@ -177,7 +177,7 @@ export const ASATable: Component = () => {
       // Provide our updateData function to our table meta
       meta: {
         updateData: (rowIndex, columnId: string | keyof AssetData, value: unknown) => {
-          console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
+          // console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
           setAccountAssets(
             // This method updates the store but changing one element isn't reactive
             // https://www.solidjs.com/docs/latest/api#arrays-in-stores
@@ -186,7 +186,7 @@ export const ASATable: Component = () => {
             // value,
             // This method replaces the whole array which makes it reactive
             (prev) => {
-              console.debug("prev: ", prev)
+              // console.debug("prev: ", prev)
               let modified = []
               modified = prev.map((row, index) => {
                 if (index === rowIndex) {
@@ -197,7 +197,7 @@ export const ASATable: Component = () => {
                 }
                 return row
               })
-              console.debug("modified: ", modified)
+              // console.debug("modified: ", modified)
               return modified
             },
           )
@@ -207,7 +207,7 @@ export const ASATable: Component = () => {
   })
 
   return (
-    <div class="max-h-[400px] min-w-[200px] overflow-y-auto">
+    <div class="max-h-[400px] overflow-auto">
       <table class="table table-pin-rows table-xs">
         <thead class="text-base text-base-content">
           <For each={table().getHeaderGroups()}>

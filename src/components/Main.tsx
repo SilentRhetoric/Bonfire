@@ -8,7 +8,7 @@ import {
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
+import { calcExtraLogs, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
 import { BonfireAssetData } from "../lib/types"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import Info from "./Info"
@@ -37,7 +37,6 @@ export default function Main() {
   const [waitingBurn, setWaitingBurn] = createSignal(false)
   const [waitingDonate, setWaitingDonate] = createSignal(false)
 
-  // eslint-disable-next-line no-unused-vars
   async function burn() {
     setWaitingBurn(true)
     setConfirmedTxn("")
@@ -46,14 +45,14 @@ export default function Main() {
       const suggestedParams = await algodClient().getTransactionParams().do()
       suggestedParams.flatFee = true
       suggestedParams.fee = suggestedParams.minFee
-      console.debug("suggestedParams: ", suggestedParams)
+      // console.debug("suggestedParams: ", suggestedParams)
 
-      console.debug("rowSelection: ", rowSelection())
+      // console.debug("rowSelection: ", rowSelection())
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
         assetsToBurn.push(accountAssets[Number(k)])
       })
-      console.debug("assetsToBurn: ", assetsToBurn)
+      // console.debug("assetsToBurn: ", assetsToBurn)
 
       if (assetsToBurn.length > 0) {
         let slots = 0
@@ -63,14 +62,13 @@ export default function Main() {
         const group = bonfire().compose()
 
         for (let i = 0; i < assetsToBurn.length; i++) {
-          const asset = assetsToBurn[i]
-          if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
-            console.debug("Adding app call to opt Bonfire into ASA ", asset.id)
-            // group.arc54OptIntoAsa(
-            //   { asa: asset.id },
-            //   { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
-            // )
-            optInAssets.push(asset.id)
+          const assetToBurn = assetsToBurn[i]
+          if (
+            assetToBurn.amount > 0 &&
+            bonfireInfo()?.assets.find((a) => a["asset-id"] === assetToBurn.id) === undefined
+          ) {
+            // console.debug("Adding app call to opt Bonfire into ASA ", asset.id)
+            optInAssets.push(assetToBurn.id)
             numOptInCalls = numOptInCalls + 1
             slots = slots + 1
           }
@@ -82,18 +80,18 @@ export default function Main() {
               } else return bonfireAddr()
             } else return undefined
           }
-          const closeRemainderAddr = await closeRemainder(asset)
-          console.debug("closeRemainderAddr: ", closeRemainderAddr)
+          const closeRemainderAddr = await closeRemainder(assetToBurn)
+          // console.debug("closeRemainderAddr: ", closeRemainderAddr)
 
           const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
             from: address(),
             to: bonfireAddr(),
-            assetIndex: asset.id,
-            amount: makeIntegerAmount(asset.decimalAmount, asset),
+            assetIndex: assetToBurn.id,
+            amount: makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn),
             closeRemainderTo: closeRemainderAddr,
             suggestedParams,
           })
-          console.debug("axfer: ", axfer.prettyPrint())
+          // console.debug("axfer: ", axfer.prettyPrint())
           axfers.push(axfer)
           // group.addTransaction(axfer)
           slots = slots + 1
@@ -101,8 +99,8 @@ export default function Main() {
 
         const extraLogs = calcExtraLogs(bonfireInfo())
 
-        const numMBRPayments = numOptInCalls - extraLogs
-        console.debug("numMBRPayments: ", numMBRPayments)
+        const numMBRPayments = Math.max(numOptInCalls - extraLogs, 0)
+        // console.debug("numMBRPayments: ", numMBRPayments)
 
         if (numMBRPayments > 0) {
           const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
@@ -111,7 +109,7 @@ export default function Main() {
             amount: 100000 * numMBRPayments,
             suggestedParams,
           })
-          console.debug("payTxn: ", payTxn.prettyPrint())
+          // console.debug("payTxn: ", payTxn.prettyPrint())
           group.addTransaction(payTxn)
         }
 
@@ -128,38 +126,44 @@ export default function Main() {
           group.addTransaction(txn)
         })
 
-        console.debug("Transaction group: ", group)
+        // console.debug("Transaction group: ", group)
 
         // Sign & send the transaction group
         const result = await group.execute()
-        console.debug("Txn confirmed result: ", result)
+        // console.debug("Txn confirmed result: ", result)
         setConfirmedTxn(result.txIds[0])
         setWaitingBurn(false)
       }
     } catch (e) {
       console.error("Error sending transaction: ", e)
+      setWaitingBurn(false)
     }
   }
 
   async function donateLogs() {
     setWaitingDonate(true)
     setConfirmedTxn("")
-    const suggestedParams = await algodClient().getTransactionParams().do()
+    try {
+      const suggestedParams = await algodClient().getTransactionParams().do()
 
-    const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
-      from: address(),
-      to: bonfireAddr(),
-      amount: 100000 * numLogs(),
-      suggestedParams,
-    })
-    const txn = await getTransactionWithSigner(payTxn, transactionSignerAccount())
+      const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
+        from: address(),
+        to: bonfireAddr(),
+        amount: 100000 * numLogs(),
+        suggestedParams,
+      })
+      const txn = await getTransactionWithSigner(payTxn, transactionSignerAccount())
 
-    const atc = new AtomicTransactionComposer()
-    atc.addTransaction(txn)
-    const result = await atc.execute(algodClient(), 4)
-    console.debug("Txn confirmed: ", result)
-    setConfirmedTxn(result.txIDs[0])
-    setWaitingDonate(false)
+      const atc = new AtomicTransactionComposer()
+      atc.addTransaction(txn)
+      const result = await atc.execute(algodClient(), 4)
+      // console.debug("Txn confirmed: ", result)
+      setConfirmedTxn(result.txIDs[0])
+      setWaitingDonate(false)
+    } catch (e) {
+      console.error("Error sending transaction: ", e)
+      setWaitingDonate(false)
+    }
   }
 
   return (
@@ -187,7 +191,7 @@ export default function Main() {
             }
           >
             <div class="flex flex-col gap-4 md:flex-row md:gap-8">
-              <div class="flex flex-col items-center gap-2 md:w-1/2">
+              <div class="flex flex-col items-center gap-2 md:w-1/3">
                 <div class="grid grid-cols-1 grid-rows-1 flex-col pt-2 text-9xl">
                   <p class="fade-element col-start-1 row-start-1 -scale-x-100">🔥</p>
                   <p class="fade-element col-start-1 row-start-1">🔥</p>
@@ -207,7 +211,7 @@ export default function Main() {
                     when={waitingBurn()}
                     fallback="Burn"
                   >
-                    <span class="loading loading-spinner" />
+                    <span class="loading loading-dots" />
                   </Show>
                 </button>
                 <Show
@@ -236,14 +240,16 @@ export default function Main() {
                     }}
                   />
                   <button
-                    class="btn btn-ghost flex w-40 flex-row whitespace-nowrap"
+                    class="btn btn-ghost w-40"
                     onClick={() => donateLogs()}
                     disabled={activeWallet() === undefined || numLogs() < 1}
                     name="Donate logs"
                   >
-                    Donate Logs x 0.1A
-                    <Show when={waitingDonate()}>
-                      <span class="loading loading-spinner" />
+                    <Show
+                      when={waitingDonate()}
+                      fallback="Add Logs x 0.1A"
+                    >
+                      <span class="loading loading-dots" />
                     </Show>
                   </button>
                 </div>
@@ -261,7 +267,7 @@ export default function Main() {
                       rel="noopener noreferrer"
                       aria-label="View transaction"
                     >
-                      View Transaction: {confirmedTxn() && `${ellipseString(confirmedTxn(), 3)}`}
+                      View Transaction
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20"
@@ -283,7 +289,7 @@ export default function Main() {
                   </button>
                 </Show>
               </div>
-              <div class="flex flex-col gap-2 md:w-1/2">
+              <div class="flex flex-col gap-2 md:w-2/3">
                 <h2 class="text-center text-2xl">Your Burnable Assets</h2>
                 <ASATable />
                 <div class="flex flex-row justify-center gap-1 text-xs">
