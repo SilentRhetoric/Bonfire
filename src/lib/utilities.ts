@@ -57,12 +57,20 @@ export const IPFS_ENDPOINT = "https://ipfs.algonode.xyz/ipfs"
 export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
   if (!asset.url) return ""
   try {
-    const optimizer = "?optimizer=image&width=450&quality=70"
+    const optimizer = "?optimizer=image&width=24&quality=70"
     if (asset.reserve && asset.url.includes("template-ipfs")) {
       const { data, cid } = await getARC19AssetData(asset.url, asset.reserve)
       const url = data.image ? data.image : `${IPFS_ENDPOINT}/${cid}${optimizer}`
-      if (url.startsWith("ipfs://")) return `${IPFS_ENDPOINT}/${url.slice(7)}${optimizer}`
-      if (url !== "") return url
+      if (url.startsWith("ipfs://")) {
+        const srcUrl = `${IPFS_ENDPOINT}/${url.slice(7)}${optimizer}`
+        // console.debug("srcUrl1: ", srcUrl)
+        return srcUrl
+      }
+      if (url !== "") {
+        const srcUrl = url
+        // console.debug("srcUrl2: ", srcUrl)
+        return srcUrl
+      }
       return ""
     }
     if (asset.url.endsWith("#arc3")) {
@@ -70,25 +78,40 @@ export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
       if (url.startsWith("ipfs://")) {
         const response = await axios.get(`${IPFS_ENDPOINT}/${url.slice(7)}`)
         if (response.data.image.startsWith("ipfs://")) {
-          return `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
+          const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
+          // console.debug("srcUrl3: ", srcUrl)
+          return srcUrl
         }
-        return response.data.image
+        const srcUrl = response.data.image
+        // console.debug("srcUrl4: ", srcUrl)
+        return srcUrl
       } else {
         const response = await axios.get(url)
         if (response.data.image.startsWith("ipfs://")) {
-          return `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
+          const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
+          // console.debug("srcUrl5: ", srcUrl)
+          return srcUrl
         }
-        return response.data.image
+        const srcUrl = response.data.image
+        // console.debug("srcUrl6: ", srcUrl)
+        return srcUrl
       }
     }
     if (asset.url.startsWith("https://") && asset.url.includes("ipfs")) {
-      return `${IPFS_ENDPOINT}/${asset.url.split("/ipfs/")[1]}${optimizer}`
+      const srcUrl = `${IPFS_ENDPOINT}/${asset.url.split("/ipfs/")[1]}${optimizer}`
+      // console.debug("srcUrl7: ", srcUrl)
+      return srcUrl
     }
     if (asset.url.startsWith("ipfs://")) {
-      return `${IPFS_ENDPOINT}/${asset.url.slice(7)}${optimizer}`
+      const srcUrl = `${IPFS_ENDPOINT}/${asset.url.slice(7)}${optimizer}`
+      // console.debug("srcUrl8: ", srcUrl)
+      return srcUrl
     }
-    return asset.url
+    const srcUrl = asset.url
+    // console.debug("srcUrl9: ", srcUrl)
+    return srcUrl
   } catch (error) {
+    console.error("Error fetching IPFS data: ", error)
     return ""
   }
 }

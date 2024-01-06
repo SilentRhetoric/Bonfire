@@ -111,6 +111,16 @@ function useBonfire() {
     }
   }
 
+  async function getBonfireInfo() {
+    try {
+      const bonfireInfo = await algodClient().accountInformation(bonfireAddr()).do()
+      // console.debug("bonfireInfo: ", bonfireInfo)
+      setBonfireInfo(bonfireInfo as AccountInfo)
+    } catch (e) {
+      console.error("Error fetching Bonfire info: ", e)
+    }
+  }
+
   const transactionSignerAccount = createMemo<TransactionSignerAccount>(() => ({
     addr: address(),
     signer: transactionSigner,
@@ -131,11 +141,13 @@ function useBonfire() {
       [address, algodClient, confirmedTxn, activeNetwork],
       async () => {
         if (address() === "") {
+          await getBonfireInfo()
           setRowSelection({})
           setAccountAssets([makeAlgoAssetDataObj(0)])
           return
         } else {
           setRowSelection({})
+          await getBonfireInfo()
           await fetchAccountInfo()
         }
       },
@@ -227,7 +239,7 @@ function useBonfire() {
     transactionSignerAccount,
     bonfire,
     bonfireInfo,
-    // refetchBonfireInfo,
+    getBonfireInfo,
     fetchAccountInfo,
     infoOpen,
     setInfoOpen,

@@ -10,13 +10,9 @@ export const ASAImage: Component<{ asset: BonfireAssetData }> = (props) => {
   const { asaList } = useAsaIcons
 
   return (
-    // <Suspense fallback={<CoinIcon />}>
     <Switch
       fallback={
-        <Image.Root
-          // fallbackDelay={20}
-          class="h-6 w-6"
-        >
+        <Image.Root class="h-6 w-6">
           <Image.Img
             src={ipfsUrl()}
             alt="Image"
@@ -29,10 +25,7 @@ export const ASAImage: Component<{ asset: BonfireAssetData }> = (props) => {
       }
     >
       <Match when={asaList.state == "ready" && asaList()[props.asset?.id]?.logo?.png}>
-        <Image.Root
-          // fallbackDelay={20}
-          class="h-6 w-6"
-        >
+        <Image.Root class="h-6 w-6">
           <Image.Img
             src={asaList.latest && asaList()[props.asset.id]?.logo?.png}
             alt="Icon"
@@ -44,6 +37,5 @@ export const ASAImage: Component<{ asset: BonfireAssetData }> = (props) => {
         </Image.Root>
       </Match>
     </Switch>
-    // </Suspense>
   )
 }
