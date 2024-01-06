@@ -10,6 +10,7 @@ import { AssetData } from "solid-algo-wallets"
 import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import useBonfire from "../lib/useBonfire"
+import { ASAImage } from "./ASAImage"
 
 declare module "@tanstack/solid-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,8 +31,6 @@ const IndeterminateCheckbox: Component<{
     }
   })
 
-  // const { groupFull, groupOverFull } = useBonfire
-
   return (
     <input
       type="checkbox"
@@ -39,7 +38,6 @@ const IndeterminateCheckbox: Component<{
       class={"checkbox"}
       name="Select asset"
       aria-label="Select asset"
-      // disabled={groupFull() || groupOverFull()}
       {...props}
     />
   )
@@ -127,7 +125,7 @@ export const ASATable: Component = () => {
             value={value()}
             onChange={onChange}
             onBlur={onBlur}
-            class="input input-xs w-32 text-right text-sm"
+            class="input input-xs w-24 text-right text-sm"
             type="number"
             max={c.row.original.decimalAmount}
             min={0}
@@ -138,19 +136,26 @@ export const ASATable: Component = () => {
       },
     },
     {
+      id: "image",
+      header: "Img",
+      cell: (c: CellContext<BonfireAssetData, unknown>) => {
+        return <ASAImage asset={c.row.original} />
+      },
+    },
+    {
       accessorKey: "name",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
       header: "Name",
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
     },
     {
       accessorKey: "unitName",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
       header: "Unit",
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
     },
     {
       accessorKey: "id",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
       header: "ID",
+      cell: (info: { getValue: () => unknown }) => info.getValue(),
     },
   ]
 
@@ -207,7 +212,7 @@ export const ASATable: Component = () => {
   })
 
   return (
-    <div class="max-h-[400px] overflow-auto">
+    <div class="max-h-[400px] max-w-[100vw] overflow-scroll">
       <table class="table table-pin-rows table-xs">
         <thead class="text-base text-base-content">
           <For each={table().getHeaderGroups()}>

@@ -84,10 +84,19 @@ function useBonfire() {
               asset.total = params.total
               asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
               asset.creator = params.creator
+              asset.reserve = params.reserve
+              asset.url = params.url
               // console.debug("Asset after: ", JSON.stringify(asset))
             }
           }),
         )
+        // await Promise.all(
+        //   assets.map(async (asset) => {
+        //     if (asset.id > 0) {
+        //       asset.imageSrc = await ipfsFromAsset(asset)
+        //     }
+        //   }),
+        // ),
         // console.debug("Assets array: ", assets)
         setAccountAssets(assets)
 
