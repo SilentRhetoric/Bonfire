@@ -66,10 +66,9 @@ export default function Main() {
         for (let i = 0; i < assetsToBurn.length; i++) {
           const assetToBurn = assetsToBurn[i]
           if (
-            assetToBurn.amount > 0 &&
+            assetToBurn.amount > 0 && // This also handles deleted assets :)
             bonfireInfo()?.assets.find((a) => a["asset-id"] === assetToBurn.id) === undefined
           ) {
-            // console.debug("Adding app call to opt Bonfire into ASA ", asset.id)
             optInAssets.push(assetToBurn.id)
             numOptInCalls = numOptInCalls + 1
             slots = slots + 1

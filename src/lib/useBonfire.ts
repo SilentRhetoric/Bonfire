@@ -13,7 +13,7 @@ export const BONFIRE_APP_IDS = {
   MainNet: 1305959747,
   TestNet: 497806551,
   BetaNet: 2019020358,
-  LocalNet: 1011,
+  LocalNet: 1013,
 }
 
 export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
@@ -165,16 +165,19 @@ function useBonfire() {
       for (let i = 0; i < assetsToBurn.length; i++) {
         numTxns = numTxns + 1
         fees = fees + 1000
-        const asset = assetsToBurn[i]
+        const assetToBurn = assetsToBurn[i]
 
-        if (bonfireInfo()?.assets.find((a) => a["asset-id"] === asset.id) === undefined) {
+        if (
+          assetToBurn.amount > 0 && // This also handles deleted assets :)
+          bonfireInfo()?.assets.find((a) => a["asset-id"] === assetToBurn.id) === undefined
+        ) {
           fees = fees + 2000
           numTxns = numTxns + 1
           numOptIns = numOptIns + 1
         }
 
-        if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
-          if (asset.creator !== address()) {
+        if (makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn) === assetToBurn.amount) {
+          if (assetToBurn.creator !== address()) {
             mbrReduction = mbrReduction + 100000
           }
         }
