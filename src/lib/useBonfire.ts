@@ -54,7 +54,7 @@ function useBonfire() {
       // console.debug("walletClient: ", client)
       try {
         const info = await getAccountInfo(addr)
-        // console.debug(info)
+        console.debug("info: ", info)
         setAccountInfo(info)
         setAlgoBalance(info.amount)
         const assetsFromRes = info.assets
@@ -75,35 +75,29 @@ function useBonfire() {
         await Promise.all(
           assets.map(async (asset) => {
             if (asset.id > 0) {
-              // console.debug("Asset before: ", JSON.stringify(asset))
-              const { params } = await algodClient().getAssetByID(asset.id).do()
-              // console.debug("params: ", params)
-              asset.name = params.name
-              asset.unitName = params["unit-name"]
-              asset.decimals = params.decimals
-              asset.total = params.total
-              asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
-              asset.creator = params.creator
-              asset.reserve = params.reserve
-              asset.url = params.url
-              // console.debug("Asset after: ", JSON.stringify(asset))
+              try {
+                // console.debug("Asset before: ", JSON.stringify(asset))
+                const { params } = await algodClient().getAssetByID(asset.id).do()
+                // console.debug("params: ", params)
+                asset.name = params.name
+                asset.unitName = params["unit-name"]
+                asset.decimals = params.decimals
+                asset.total = params.total
+                asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+                asset.creator = params.creator
+                asset.reserve = params.reserve
+                asset.url = params.url
+                // console.debug("Asset after: ", JSON.stringify(asset))
+              } catch (e) {
+                console.error(`Error fetching asset ${asset.id} info: `, e)
+                asset.name = "[Deleted Asset]"
+                asset.unitName = "N/A"
+              }
             }
           }),
         )
-        // await Promise.all(
-        //   assets.map(async (asset) => {
-        //     if (asset.id > 0) {
-        //       asset.imageSrc = await ipfsFromAsset(asset)
-        //     }
-        //   }),
-        // ),
         // console.debug("Assets array: ", assets)
         setAccountAssets(assets)
-
-        //Get Bonfire app info
-        const bonfireInfo = await algodClient().accountInformation(bonfireAddr()).do()
-        // console.debug("bonfireInfo: ", bonfireInfo)
-        setBonfireInfo(bonfireInfo as AccountInfo)
       } catch (e) {
         setAccountAssets([makeAlgoAssetDataObj(0)])
         console.error("Error fetching account info: ", e)
@@ -146,8 +140,8 @@ function useBonfire() {
           setAccountAssets([makeAlgoAssetDataObj(0)])
           return
         } else {
-          setRowSelection({})
           await getBonfireInfo()
+          setRowSelection({})
           await fetchAccountInfo()
         }
       },
