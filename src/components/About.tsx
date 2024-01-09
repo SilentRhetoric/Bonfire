@@ -1,4 +1,6 @@
-export default function Info() {
+import { BONFIRE_APP_IDS } from "../lib/useBonfire"
+
+export default function About() {
   return (
     <div class="prose">
       <h2>About Bonfire</h2>
@@ -10,17 +12,11 @@ export default function Info() {
           href="https://arc.algorand.foundation/ARCs/arc-0054"
           target="_blank"
           aria-label="ARC-54"
-          class="underline"
         >
           ARC-54
         </a>{" "}
         standard.
       </p>
-      <b>
-        IMPORTANT: While Bonfire is in Beta and ARC-54 is still in Draft status, assets burned here
-        may not conform to the eventual standard. Do not use the app to burn assets for any official
-        purpose until the ARC is finalized and Bonfire is out of Beta.
-      </b>
       <h3>Why is Bonfire useful?</h3>
       <p>
         Standardizing ASA burns enables explorers, DeFi metrics, and other tools in the ecosystem to
@@ -56,23 +52,6 @@ export default function Info() {
         contract. The app runs purely on your browser client and can be installed locally in Chrome
         by clicking the "Install Bonfire" button on the right side of the address bar.
       </p>
-      <h3>Smart contract design</h3>
-      <p>
-        The smart contract used for burning is documented in the{" "}
-        <a
-          href="https://arc.algorand.foundation/ARCs/arc-0054"
-          target="_blank"
-          aria-label="ARC-54"
-          class="underline"
-        >
-          ARC-54
-        </a>{" "}
-        standard. It is an application with a single method that requests the app opt into any ASA.
-        Anyone can call this method at any time for any ASA, and the app will opt in as long as the
-        opt in fee is covered by the caller and the application account has sufficient Algo balance
-        to cover the increased Minimum Balance Requirement (MBR) required to hold the ASA. Note that
-        the smart contract can also be called by other smart contracts, if desired.
-      </p>
       <h3>Interface design</h3>
       <p>
         The user interface is designed to make it easy for people to burn one or multiple ASAs. For
@@ -83,6 +62,26 @@ export default function Info() {
         contract's MBR needs. The interface will display reductions in your account's MBR less the
         cost of burning and the net effect on your available Algo balance after burning.
       </p>
+      <h3>Smart contract design</h3>
+      <p>
+        The smart contract used for burning is documented in the{" "}
+        <a
+          href="https://arc.algorand.foundation/ARCs/arc-0054"
+          target="_blank"
+          aria-label="ARC-54"
+        >
+          ARC-54
+        </a>{" "}
+        standard. It is an application with a single method that requests the app opt into any ASA.
+        Anyone can call this method at any time for any ASA, and the app will opt in as long as the
+        opt in fee is covered by the caller and the application account has sufficient Algo balance
+        to cover the increased Minimum Balance Requirement (MBR) required to hold the ASA. Note that
+        the smart contract can also be called by other smart contracts, if desired.
+      </p>
+      <p>The smart contract is deployed with the following IDs on each public network:</p>
+      <li>MainNet: {BONFIRE_APP_IDS.MainNet}</li>
+      <li>TestNet: {BONFIRE_APP_IDS.TestNet}</li>
+      <li>BetaNet: {BONFIRE_APP_IDS.BetaNet}</li>
       <h3>Pay it forward</h3>
       <p>
         It costs 0.1A for the smart contract to opt into each ASA. The interface displays how many

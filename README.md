@@ -2,7 +2,7 @@
 
 # Bonfire 🔥
 
-Bonfire is a tool for burning Algorand Standard Assets (ASA). The live web app can be found at [https://asa-bonfire.netlify.app](https://asa-bonfire.netlify.app).
+Bonfire is a tool for burning Algorand Standard Assets (ASA). The live web app can be found at [https://thebonfire.app](https://thebonfire.app).
 
 The app utilizes [SolidJS](https://www.solidjs.com) for reactivity, [Vite](https://vitejs.dev) dev tooling, [Tailwind CSS](https://tailwindcss.com) styles, and [daisyUI](https://daisyui.com) components.
 
@@ -35,13 +35,19 @@ Anyone! Bonfire is a free and open source interface for the permissionless burni
 contract. The app runs purely on your browser client and can be installed locally in Chrome
 by clicking the "Install Bonfire" button on the right side of the address bar.
 
+## Interface design
+
+The user interface is designed to make it easy for people to burn one or multiple ASAs. For each ASA selected, the app will prepare the necessary transactions. If the Bonfire smart contract has not yet opted into the ASA to be burned, an app call will be added to your transaction group. If the Bonfire smart contract needs additional MBR to cover the opt-in, a payment will be added to your transaction group with just enough Algos to cover the contract's MBR needs. The interface will display reductions in your account's MBR less the cost of burning and the net effect on your available Algo balance after burning.
+
 ## Smart contract design
 
 The smart contract used for burning is documented in the [ARC-54](https://arc.algorand.foundation/ARCs/arc-0054) standard. It is an application with a single method that requests the app opt into any ASA. Anyone can call this method at any time for any ASA, and the app will opt in as long as the opt in fee is covered by the caller and the application account has sufficient Algo balance to cover the increased Minimum Balance Requirement (MBR). Note that the smart contract can also be called by other smart contracts, if desired.
 
-## Interface design
+The smart contract is deployed with the following IDs on each publish network:
 
-The user interface is designed to make it easy for people to burn one or multiple ASAs. For each ASA selected, the app will prepare the necessary transactions. If the Bonfire smart contract has not yet opted into the ASA to be burned, an app call will be added to your transaction group. If the Bonfire smart contract needs additional MBR to cover the opt-in, a payment will be added to your transaction group with just enough Algos to cover the contract's MBR needs. The interface will display reductions in your account's MBR less the cost of burning and the net effect on your available Algo balance after burning.
+- MainNet: 1305959747
+- TestNet: 497806551
+- BetaNet: 2019020358
 
 ## Pay it forward
 

@@ -16,7 +16,7 @@ export const BONFIRE_APP_IDS = {
   LocalNet: 1013,
 }
 
-export function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
+function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
   return {
     id: 0,
     amount: amt,
@@ -128,7 +128,9 @@ function useBonfire() {
     }
   })
 
-  const bonfire = createMemo(() => new Arc54Client(appDetails(), algodClient()))
+  const bonfireAppId = createMemo(() => BONFIRE_APP_IDS[activeNetwork()])
+
+  const bonfireClient = createMemo(() => new Arc54Client(appDetails(), algodClient()))
 
   createComputed(
     on(
@@ -219,7 +221,7 @@ function useBonfire() {
   })
 
   return {
-    APP_IDS: BONFIRE_APP_IDS,
+    bonfireAppId,
     bonfireAddr,
     algoBalance,
     setAlgoBalance,
@@ -234,7 +236,7 @@ function useBonfire() {
     confirmedTxn,
     setConfirmedTxn,
     transactionSignerAccount,
-    bonfire,
+    bonfireClient,
     bonfireInfo,
     getBonfireInfo,
     fetchAccountInfo,
