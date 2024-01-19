@@ -89,6 +89,13 @@ export default function About() {
         fire for 0.1A each so that the next person who needs to burn some assets can do so without
         needing to pay the MBR to the smart contract.
       </p>
+      <h3>Disclaimer</h3>
+      <p>
+        Use at your own risk. Always verify in your wallet that each transaction is what you
+        expected before signing. Once assets are sent to the smart contract, they can never be
+        recovered unless they have clawback enabled. This software is provided under MIT license,
+        and the source code is available through the GitHub link in the page footer.
+      </p>
     </div>
   )
 }
