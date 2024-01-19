@@ -54,7 +54,7 @@ function useBonfire() {
       // console.debug("walletClient: ", client)
       try {
         const info = await getAccountInfo(addr)
-        console.debug("info: ", info)
+        // console.debug("info: ", info)
         setAccountInfo(info)
         setAlgoBalance(info.amount)
         const assetsFromRes = info.assets
@@ -204,6 +204,8 @@ function useBonfire() {
     }
     return groupObj
   })
+
+  // createComputed(() => console.debug("group: ", JSON.stringify(group())))
 
   const groupFull = createMemo(() => {
     if (group()?.numTxns == 16) {

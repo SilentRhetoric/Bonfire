@@ -51,12 +51,12 @@ export default function Main() {
       suggestedParams.fee = suggestedParams.minFee
       // console.debug("suggestedParams: ", suggestedParams)
 
-      // console.debug("rowSelection: ", rowSelection())
+      console.debug("rowSelection: ", rowSelection())
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
         assetsToBurn.push(accountAssets[Number(k)])
       })
-      // console.debug("assetsToBurn: ", assetsToBurn)
+      // console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
 
       if (assetsToBurn.length > 0) {
         let slots = 0
@@ -128,8 +128,6 @@ export default function Main() {
         axfers.forEach((txn) => {
           group.addTransaction(txn)
         })
-
-        // console.debug("Transaction group: ", group)
 
         // Sign & send the transaction group
         const result = await group.execute()

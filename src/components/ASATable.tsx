@@ -50,7 +50,11 @@ export const ASATable: Component = () => {
 
   const { getAsaUrl } = UseNetwork
 
-  // createComputed(() => console.debug("accountAsssets in component: ", accountAssets))
+  // createComputed(() =>
+  //   console.debug("accountAsssets in component: ", JSON.stringify(accountAssets)),
+  // )
+  // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
+  // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
 
   const columns = [
     {
