@@ -11,7 +11,8 @@ import { ASATable } from "./ASATable"
 import { calcExtraLogs, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
 import { BonfireAssetData } from "../lib/types"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
-import Info from "./Info"
+import About from "./About"
+import { AlloIcon } from "./Icons"
 
 export default function Main() {
   onMount(() => reconnectWallet())
@@ -19,12 +20,13 @@ export default function Main() {
 
   const { activeWallet, address, connectWallet, reconnectWallet, walletInterfaces } =
     UseSolidAlgoWallets
-  const { algodClient, getTxUrl } = UseNetwork
+  const { algodClient, getAppUrl, getTxUrl } = UseNetwork
   const {
+    bonfireAppId,
     accountAssets,
     rowSelection,
     bonfireAddr,
-    bonfire,
+    bonfireClient,
     bonfireInfo,
     getBonfireInfo,
     confirmedTxn,
@@ -49,19 +51,19 @@ export default function Main() {
       suggestedParams.fee = suggestedParams.minFee
       // console.debug("suggestedParams: ", suggestedParams)
 
-      // console.debug("rowSelection: ", rowSelection())
+      console.debug("rowSelection: ", rowSelection())
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
         assetsToBurn.push(accountAssets[Number(k)])
       })
-      // console.debug("assetsToBurn: ", assetsToBurn)
+      // console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
 
       if (assetsToBurn.length > 0) {
         let slots = 0
         let numOptInCalls = 0
         const optInAssets = []
         const axfers = []
-        const group = bonfire().compose()
+        const group = bonfireClient().compose()
 
         for (let i = 0; i < assetsToBurn.length; i++) {
           const assetToBurn = assetsToBurn[i]
@@ -127,8 +129,6 @@ export default function Main() {
           group.addTransaction(txn)
         })
 
-        // console.debug("Transaction group: ", group)
-
         // Sign & send the transaction group
         const result = await group.execute()
         // console.debug("Txn confirmed result: ", result)
@@ -168,11 +168,11 @@ export default function Main() {
   }
 
   return (
-    <main class="mb-auto min-h-[calc(100vh-234px)] bg-gradient-to-b from-base-300 to-base-200">
+    <main class="mb-auto min-h-[calc(100vh-234px)] bg-gradient-to-b from-base-300 to-base-100">
       <div class="flex flex-col items-center justify-start p-4">
         <Show
           when={!infoOpen()}
-          fallback={<Info />}
+          fallback={<About />}
         >
           <div class="flex flex-col gap-4 md:flex-row md:gap-8">
             <div class="flex flex-col items-center gap-2 md:w-1/3">
@@ -200,7 +200,14 @@ export default function Main() {
               </button>
               <div class="flex flex-row justify-evenly gap-4 whitespace-nowrap">
                 <p>Extra Logs: {extraLogs()}</p>
-                <p>ASAshes: {bonfireInfo()?.assets?.length}</p>
+                <a
+                  href={getAppUrl(bonfireAppId())}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View app details"
+                >
+                  ASAshes: {bonfireInfo()?.assets?.length}
+                </a>
               </div>
               <div class="flex flex-row items-center justify-center gap-2">
                 <input
@@ -222,7 +229,7 @@ export default function Main() {
                   class="btn btn-ghost w-40"
                   onClick={() => donateLogs()}
                   disabled={activeWallet() === undefined || numLogs() < 1}
-                  name="Donate logs"
+                  name="Add logs"
                 >
                   <Show
                     when={waitingDonate()}
@@ -236,36 +243,20 @@ export default function Main() {
                 when={confirmedTxn().length > 0}
                 fallback={null}
               >
-                <button
-                  class="w-66 btn btn-ghost"
-                  disabled={confirmedTxn().length === 0}
+                <a
+                  href={getTxUrl(confirmedTxn())}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View transaction"
                 >
-                  <a
-                    href={getTxUrl(confirmedTxn())}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="View transaction"
+                  <button
+                    class="w-66 btn btn-ghost"
+                    disabled={confirmedTxn().length === 0}
                   >
                     View Transaction
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      class="ml-2 inline h-5 w-5"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5z"
-                        clip-rule="evenodd"
-                      />
-                      <path
-                        fill-rule="evenodd"
-                        d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </a>
-                </button>
+                    <AlloIcon />
+                  </button>
+                </a>
               </Show>
             </div>
             <Show

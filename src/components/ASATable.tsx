@@ -6,7 +6,7 @@ import {
   RowData,
   CellContext,
 } from "@tanstack/solid-table"
-import { AssetData } from "solid-algo-wallets"
+import { AssetData, UseNetwork } from "solid-algo-wallets"
 import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import useBonfire from "../lib/useBonfire"
@@ -48,7 +48,13 @@ export const ASATable: Component = () => {
     useBonfire
   const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
 
-  // createComputed(() => console.debug("accountAsssets in component: ", accountAssets))
+  const { getAsaUrl } = UseNetwork
+
+  // createComputed(() =>
+  //   console.debug("accountAsssets in component: ", JSON.stringify(accountAssets)),
+  // )
+  // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
+  // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
 
   const columns = [
     {
@@ -161,17 +167,27 @@ export const ASATable: Component = () => {
     {
       accessorKey: "name",
       header: "Name",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
+      cell: (info: { getValue: () => string }) => info.getValue(),
     },
     {
       accessorKey: "unitName",
       header: "Unit",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
+      cell: (info: { getValue: () => string }) => info.getValue(),
     },
     {
       accessorKey: "id",
       header: "ID",
-      cell: (info: { getValue: () => unknown }) => info.getValue(),
+      cell: (info: { getValue: () => number }) => {
+        return (
+          <a
+            href={getAsaUrl(info.getValue())}
+            target="_blank"
+            aria-label="View asset on Allo"
+          >
+            {info.getValue()}
+          </a>
+        )
+      },
     },
   ]
 
@@ -228,7 +244,7 @@ export const ASATable: Component = () => {
   })
 
   return (
-    <div class="max-h-[400px] max-w-[100vw] overflow-scroll">
+    <div class="max-h-[400px] max-w-[100vw] overflow-auto">
       <table class="table table-pin-rows table-xs">
         <thead class="text-base text-base-content">
           <For each={table().getHeaderGroups()}>

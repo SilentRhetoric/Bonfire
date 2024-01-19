@@ -8,15 +8,15 @@ export default function Header() {
   const { activeNetwork, setActiveNetwork, networkNames } = UseNetwork
   const { infoOpen, setInfoOpen } = useBonfire
   return (
-    <div class="sticky top-0 z-50 flex flex-row items-center bg-base-300 p-2 sm:px-4">
+    <div class="sticky top-0 z-50 flex flex-row items-center bg-base-300 px-1 py-1 sm:p-2">
       <div class="flex items-end">
-        <h1 class="ml-1 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
+        <h1 class="ml-2 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text text-2xl font-bold text-transparent min-[375px]:text-4xl">
           Bonfire
         </h1>
         <p class="text-xs">Beta</p>
       </div>
       <div class="grow" />
-      <div class="flex gap-2">
+      <div class="flex gap-1 sm:gap-2">
         <button
           class={infoOpen() ? `btn btn-outline` : `btn btn-ghost`}
           name="information"
@@ -64,7 +64,7 @@ export default function Header() {
                 {(acc) => (
                   <li>
                     <div onClick={() => setAddress(acc.address)}>
-                      {ellipseString(acc.address, 4)}
+                      {ellipseString(acc.address, 3)}
                     </div>
                   </li>
                 )}
