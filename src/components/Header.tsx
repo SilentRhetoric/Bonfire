@@ -27,12 +27,15 @@ export default function Header() {
         <div class="dropdown dropdown-end dropdown-bottom">
           <div
             class="btn btn-ghost"
-            tabindex="0"
+            tabindex={0}
             role="button"
           >
             {activeNetwork()[0]}
           </div>
-          <ul class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2">
+          <ul
+            tabIndex={0}
+            class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2"
+          >
             <For each={networkNames}>
               {(network) => (
                 <li>
@@ -58,7 +61,7 @@ export default function Header() {
             </div>
             <ul
               tabIndex={0}
-              class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2 shadow"
+              class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2"
             >
               <For each={activeWallet()?.accounts()}>
                 {(acc) => (
