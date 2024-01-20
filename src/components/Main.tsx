@@ -20,7 +20,7 @@ export default function Main() {
 
   const { activeWallet, address, connectWallet, reconnectWallet, walletInterfaces } =
     UseSolidAlgoWallets
-  const { algodClient, getAppUrl, getTxUrl } = UseNetwork
+  const { algodClient, getAppUrl, getTxUrl, activeNetwork } = UseNetwork
   const {
     bonfireAppId,
     accountAssets,
@@ -256,7 +256,9 @@ export default function Main() {
                     disabled={confirmedTxn().length === 0}
                   >
                     View Transaction
-                    <AlloIcon />
+                    <Show when={activeNetwork() === "MainNet"}>
+                      <AlloIcon />
+                </Show>
                   </button>
                 </a>
               </Show>

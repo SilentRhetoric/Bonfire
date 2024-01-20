@@ -1,6 +1,6 @@
 {
   "name": "bonfire",
-  "version": "0.0.1",
+  "version": "0.9.1",
   "description": "A communal bonfire for verifiably burning Algorand Standard Assets",
   "scripts": {
     "start": "vite",
