@@ -35,6 +35,9 @@ export default function Main() {
     infoOpen,
     group,
     groupOverFull,
+    loadingAccountInfo,
+    numAssets,
+    numAssetsLoaded,
   } = useBonfire
   const extraLogs = createMemo(() => calcExtraLogs(bonfireInfo()))
   const [numLogs, setNumLogs] = createSignal(0)
@@ -56,7 +59,7 @@ export default function Main() {
       Object.entries(rowSelection()).forEach(([k]) => {
         assetsToBurn.push(accountAssets[Number(k)])
       })
-      // console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
+      console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
 
       if (assetsToBurn.length > 0) {
         let slots = 0
@@ -94,9 +97,8 @@ export default function Main() {
             closeRemainderTo: closeRemainderAddr,
             suggestedParams,
           })
-          // console.debug("axfer: ", axfer.prettyPrint())
+          console.debug("axfer: ", axfer.prettyPrint())
           axfers.push(axfer)
-          // group.addTransaction(axfer)
           slots = slots + 1
         }
 
@@ -124,7 +126,7 @@ export default function Main() {
           ),
         )
 
-        // Now add asset transfers
+        // Now add asset transfers after the optIn calls
         axfers.forEach((txn) => {
           group.addTransaction(txn)
         })
@@ -279,9 +281,25 @@ export default function Main() {
                 </div>
               }
             >
-              <div class="flex flex-col gap-2 md:w-2/3">
+              <div class="flex flex-col items-center gap-2 md:w-2/3">
                 <h2 class="text-center text-2xl">Your Burnable Assets</h2>
-                <ASATable />
+                <Show
+                  when={!loadingAccountInfo()}
+                  fallback={
+                    <div class="flex h-64 w-64 flex-col items-center justify-center gap-8 p-8">
+                      <p class="w-64 text-center text-sm italic">
+                        Loading asset data at a rate that doesn't break AlgoNode...
+                      </p>
+                      <progress
+                        class="progress-base-content progress"
+                        value={numAssetsLoaded()}
+                        max={numAssets()}
+                      />
+                    </div>
+                  }
+                >
+                  <ASATable />
+                </Show>
                 <div class="flex flex-row justify-center gap-1 text-xs">
                   <p>Reduce MBR {numberToDecimal(group().mbrReduction, 6)}A</p>
                   <p>-</p>

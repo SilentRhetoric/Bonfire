@@ -33,6 +33,7 @@ function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
 function useBonfire() {
   // Use reactive roots to compose app state
   const { address, transactionSigner } = UseSolidAlgoWallets
+  // const address = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" Large acct for stress testing
   const { algodClient, getAccountInfo, activeNetwork } = UseNetwork
   const [algoBalance, setAlgoBalance] = createSignal(0)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
@@ -42,12 +43,20 @@ function useBonfire() {
   const [sorting, setSorting] = createSignal<SortingState>([])
   const [rowSelection, setRowSelection] = createSignal({})
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
+  const [loadingAccountInfo, setLoadingAccountInfo] = createSignal(false)
+  const [numAssets, setNumAssets] = createSignal(0)
+  const [numAssetsLoaded, setNumAssetsLoaded] = createSignal(0)
 
   const bonfireAddr = createMemo(() => getApplicationAddress(BONFIRE_APP_IDS[activeNetwork()]))
 
   async function fetchAccountInfo() {
     // Get connected address info
     // console.debug("fetchAccountInfo")
+
+    // Set loading state
+    setLoadingAccountInfo(true)
+    setNumAssetsLoaded(0)
+
     const addr = address()
     // console.debug("addr: ", addr)
     if (addr) {
@@ -58,6 +67,7 @@ function useBonfire() {
         setAccountInfo(info)
         setAlgoBalance(info.amount)
         const assetsFromRes = info.assets
+        setNumAssets(assetsFromRes.length)
         // console.debug("Assets from response", assetsFromRes)
         // Reshape the asset data from the account info slightly
         const assets: BonfireAssetData[] = [
@@ -72,35 +82,67 @@ function useBonfire() {
             creator: "",
           })),
         ]
-        await Promise.all(
-          assets.map(async (asset) => {
-            if (asset.id > 0) {
-              try {
-                // console.debug("Asset before: ", JSON.stringify(asset))
-                const { params } = await algodClient().getAssetByID(asset.id).do()
-                // console.debug("params: ", params)
-                asset.name = params.name
-                asset.unitName = params["unit-name"]
-                asset.decimals = params.decimals
-                asset.total = params.total
-                asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
-                asset.creator = params.creator
-                asset.reserve = params.reserve
-                asset.url = params.url
-                // console.debug("Asset after: ", JSON.stringify(asset))
-              } catch (e) {
-                console.error(`Error fetching asset ${asset.id} info: `, e)
-                asset.name = "[Deleted Asset]"
-                asset.unitName = "N/A"
-              }
+
+        for (const asset of assets) {
+          await new Promise((r) => setTimeout(r, 20))
+          if (asset.id > 0) {
+            try {
+              // console.debug("Asset before: ", JSON.stringify(asset))
+              const { params } = await algodClient().getAssetByID(asset.id).do()
+              // console.debug("params: ", params)
+              asset.name = params.name
+              asset.unitName = params["unit-name"]
+              asset.decimals = params.decimals
+              asset.total = params.total
+              asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+              asset.creator = params.creator
+              asset.reserve = params.reserve
+              asset.url = params.url
+              // console.debug("Asset after: ", JSON.stringify(asset))
+            } catch (e) {
+              console.error(`Error fetching asset ${asset.id} info: `, e)
+              asset.name = "[Deleted Asset]"
+              asset.unitName = "N/A"
             }
-          }),
-        )
+          }
+          setNumAssetsLoaded((n) => n + 1)
+        }
+
+        // Goes too fast for large numbers of assets; converted to for loop above
+        // await Promise.all(
+        //   assets.map(async (asset) => {
+        //     if (asset.id > 0) {
+        //       try {
+        //         console.debug("Asset before: ", JSON.stringify(asset))
+        //         const { params } = await algodClient().getAssetByID(asset.id).do()
+        //         console.debug("params: ", params)
+        //         asset.name = params.name
+        //         asset.unitName = params["unit-name"]
+        //         asset.decimals = params.decimals
+        //         asset.total = params.total
+        //         asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+        //         asset.creator = params.creator
+        //         asset.reserve = params.reserve
+        //         asset.url = params.url
+        //         console.debug("Asset after: ", JSON.stringify(asset))
+        //       } catch (e) {
+        //         console.error(`Error fetching asset ${asset.id} info: `, e)
+        //         asset.name = "[Deleted Asset]"
+        //         asset.unitName = "N/A"
+        //       }
+        //     }
+        //   }),
+        // )
+
         // console.debug("Assets array: ", assets)
         setAccountAssets(assets)
+        setLoadingAccountInfo(false)
       } catch (e) {
         setAccountAssets([makeAlgoAssetDataObj(0)])
         console.error("Error fetching account info: ", e)
+        setLoadingAccountInfo(false)
+        setNumAssets(0)
+        setNumAssetsLoaded(0)
       }
     }
   }
@@ -247,6 +289,9 @@ function useBonfire() {
     group,
     groupFull,
     groupOverFull,
+    loadingAccountInfo,
+    numAssets,
+    numAssetsLoaded,
   }
 }
 export default createRoot(useBonfire)
