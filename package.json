@@ -1,6 +1,6 @@
 {
   "name": "bonfire",
-  "version": "0.0.1",
+  "version": "0.9.1",
   "description": "A communal bonfire for verifiably burning Algorand Standard Assets",
   "scripts": {
     "start": "vite",
@@ -11,32 +11,32 @@
   "license": "MIT",
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
-    "@types/node": "^20.8.10",
-    "@typescript-eslint/eslint-plugin": "^6.11.0",
-    "@typescript-eslint/parser": "^6.11.0",
-    "autoprefixer": "^10.4.16",
-    "daisyui": "^4.4.19",
-    "eslint": "^8.54.0",
-    "eslint-plugin-solid": "^0.13.0",
-    "postcss": "^8.4.31",
-    "prettier": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.5.6",
-    "solid-devtools": "^0.28.1",
-    "tailwindcss": "^3.3.5",
-    "typescript": "^5.2.2",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "autoprefixer": "^10.4.17",
+    "daisyui": "^4.6.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-solid": "^0.13.1",
+    "postcss": "^8.4.33",
+    "prettier": "^3.2.4",
+    "prettier-plugin-tailwindcss": "^0.5.11",
+    "solid-devtools": "^0.29.2",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
     "vite": "^4.5.0",
     "vite-plugin-cdn-import": "^0.3.5",
     "vite-plugin-eslint": "^1.8.1",
-    "vite-plugin-solid": "^2.7.2"
+    "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "^5.0.1",
-    "@kobalte/core": "^0.11.2",
-    "@tanstack/solid-table": "^8.10.7",
+    "@algorandfoundation/algokit-utils": "^5.2.0",
+    "@kobalte/core": "^0.12.1",
+    "@tanstack/solid-table": "^8.11.6",
     "algosdk": "^2.7.0",
     "axios": "^1.6.5",
-    "multiformats": "^12.1.3",
-    "solid-algo-wallets": "^0.1.2",
-    "solid-js": "^1.8.5"
+    "multiformats": "^13.0.1",
+    "solid-algo-wallets": "^0.1.6",
+    "solid-js": "^1.8.11"
   }
 }

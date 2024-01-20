@@ -7,7 +7,7 @@ import {
   CellContext,
 } from "@tanstack/solid-table"
 import { AssetData, UseNetwork } from "solid-algo-wallets"
-import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
+import { Component, For, createComputed, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import useBonfire from "../lib/useBonfire"
 import { ASAImage } from "./ASAImage"
@@ -54,7 +54,7 @@ export const ASATable: Component = () => {
   //   console.debug("accountAsssets in component: ", JSON.stringify(accountAssets)),
   // )
   // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
-  // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
+  createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
 
   const columns = [
     {
