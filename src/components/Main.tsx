@@ -258,7 +258,7 @@ export default function Main() {
                     View Transaction
                     <Show when={activeNetwork() === "MainNet"}>
                       <AlloIcon />
-                </Show>
+                    </Show>
                   </button>
                 </a>
               </Show>
@@ -290,7 +290,10 @@ export default function Main() {
                   fallback={
                     <div class="flex h-64 w-64 flex-col items-center justify-center gap-8 p-8">
                       <p class="w-64 text-center text-sm italic">
-                        Loading asset data at a rate that doesn't break AlgoNode...
+                        Loading asset data at a rate that is gentle on AlgoNode's free API...
+                      </p>
+                      <p class="w-64 text-center text-sm italic">
+                        Take a deep breath and remember that burning is irreversible.
                       </p>
                       <progress
                         class="progress-base-content progress"

@@ -20,12 +20,15 @@ dependencies:
   axios:
     specifier: ^1.6.5
     version: 1.6.5
+  limiter:
+    specifier: ^2.1.0
+    version: 2.1.0
   multiformats:
     specifier: ^13.0.1
     version: 13.0.1
   solid-algo-wallets:
-    specifier: ^0.1.6
-    version: 0.1.6(react@18.2.0)(solid-js@1.8.11)
+    specifier: ^0.1.7
+    version: 0.1.7(react@18.2.0)(solid-js@1.8.11)
   solid-js:
     specifier: ^1.8.11
     version: 1.8.11
@@ -3482,6 +3485,10 @@ packages:
     resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
     dev: false
 
+  /just-performance@4.3.0:
+    resolution: {integrity: sha512-L7RjvtJsL0QO8xFs5wEoDDzzJwoiowRw6Rn/GnvldlchS2JQr9wFYPiwZcDfrbbujEKqKN0tvENdbjXdYhDp5Q==}
+    dev: false
+
   /kebab-case@1.0.2:
     resolution: {integrity: sha512-7n6wXq4gNgBELfDCpzKc+mRrZFs7D+wgfF5WRFLNAr4DA/qtr9Js8uOAVAfHhuLMfAcQ0pRKqbpjx+TcJVdE1Q==}
     dev: true
@@ -3517,6 +3524,12 @@ packages:
     resolution: {integrity: sha512-K2U4W2Ff5ibV7j7ydLr+zLAkIg5JJ4lPn1Ltsdt+Tz/IjQ8buJ55pZAxoP34lqIiwtF9iAvtLv3JGv7CAyAg+g==}
     engines: {node: '>=14'}
     dev: true
+
+  /limiter@2.1.0:
+    resolution: {integrity: sha512-361TYz6iay6n+9KvUUImqdLuFigK+K79qrUtBsXhJTLdH4rIt/r1y8r1iozwh8KbZNpujbFTSh74mJ7bwbAMOw==}
+    dependencies:
+      just-performance: 4.3.0
+    dev: false
 
   /lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -4392,8 +4405,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /solid-algo-wallets@0.1.6(react@18.2.0)(solid-js@1.8.11):
-    resolution: {integrity: sha512-7FkRMoxNbYqS5PzyYU9Ce/3QhJjOSH7mmQHF8LjvLD2OlauDie69Wa/RSt7AUPyOfkQlMsY0+FvJxoLHoB0VHQ==}
+  /solid-algo-wallets@0.1.7(react@18.2.0)(solid-js@1.8.11):
+    resolution: {integrity: sha512-knObJMmbCzhRYooGgad+kLPJatSzi1rcevmG0h7+YIcJ3a38jwtgIhE2ByHlOnrP86pHB+9IiYP97Gmc/mz+Qw==}
     engines: {node: '>=18', pnpm: '>=8.6.0'}
     peerDependencies:
       solid-js: ^1.8.11

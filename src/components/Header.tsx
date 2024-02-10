@@ -13,7 +13,6 @@ export default function Header() {
         <h1 class="ml-2 flex bg-gradient-to-l from-yellow-500 via-orange-500 to-red-500 bg-clip-text text-2xl font-bold text-transparent min-[375px]:text-4xl">
           Bonfire
         </h1>
-        <p class="text-xs">Beta</p>
       </div>
       <div class="grow" />
       <div class="flex gap-1 sm:gap-2">

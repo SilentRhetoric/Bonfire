@@ -8,9 +8,10 @@ import { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/type
 import { Arc54Client } from "./Arc54Client"
 import { getApplicationAddress } from "algosdk"
 import { AppDetails } from "@algorandfoundation/algokit-utils/types/app-client"
+import { RateLimiter } from "limiter"
 
 export const BONFIRE_APP_IDS = {
-  MainNet: 1305959747,
+  MainNet: 1257620981, // Beta used 1305959747,
   TestNet: 497806551,
   BetaNet: 2019020358,
   LocalNet: 1013,
@@ -33,7 +34,7 @@ function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
 function useBonfire() {
   // Use reactive roots to compose app state
   const { address, transactionSigner } = UseSolidAlgoWallets
-  // const address = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" Large acct for stress testing
+  // const address = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const { algodClient, getAccountInfo, activeNetwork } = UseNetwork
   const [algoBalance, setAlgoBalance] = createSignal(0)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
@@ -83,32 +84,62 @@ function useBonfire() {
           })),
         ]
 
-        for (const asset of assets) {
-          await new Promise((r) => setTimeout(r, 20))
-          if (asset.id > 0) {
-            try {
-              // console.debug("Asset before: ", JSON.stringify(asset))
-              const { params } = await algodClient().getAssetByID(asset.id).do()
-              // console.debug("params: ", params)
-              asset.name = params.name
-              asset.unitName = params["unit-name"]
-              asset.decimals = params.decimals
-              asset.total = params.total
-              asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
-              asset.creator = params.creator
-              asset.reserve = params.reserve
-              asset.url = params.url
-              // console.debug("Asset after: ", JSON.stringify(asset))
-            } catch (e) {
-              console.error(`Error fetching asset ${asset.id} info: `, e)
-              asset.name = "[Deleted Asset]"
-              asset.unitName = "N/A"
+        // Throttle API requests to to kind to Urtho's free API
+        const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 50 })
+        await Promise.all(
+          assets.map(async (asset) => {
+            if (asset.id > 0) {
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const remainingRequests = await limiter.removeTokens(1)
+                // console.debug("Asset before: ", JSON.stringify(asset))
+                const { params } = await algodClient().getAssetByID(asset.id).do()
+                // console.debug("params: ", params)
+                asset.name = params.name
+                asset.unitName = params["unit-name"]
+                asset.decimals = params.decimals
+                asset.total = params.total
+                asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+                asset.creator = params.creator
+                asset.reserve = params.reserve
+                asset.url = params.url
+                // console.debug("Asset after: ", JSON.stringify(asset))
+              } catch (e) {
+                console.error(`Error fetching asset ${asset.id} info: `, e)
+                asset.name = "[Deleted Asset]"
+                asset.unitName = "N/A"
+              }
+              setNumAssetsLoaded((n) => n + 1)
             }
-          }
-          setNumAssetsLoaded((n) => n + 1)
-        }
+          }),
+        )
 
-        // Goes too fast for large numbers of assets; converted to for loop above
+        // Intentionally doing these sequentially to be kind to Urtho's free API
+        // for (const asset of assets) {
+        //   if (asset.id > 0) {
+        //     try {
+        //       // console.debug("Asset before: ", JSON.stringify(asset))
+        //       const { params } = await algodClient().getAssetByID(asset.id).do()
+        //       // console.debug("params: ", params)
+        //       asset.name = params.name
+        //       asset.unitName = params["unit-name"]
+        //       asset.decimals = params.decimals
+        //       asset.total = params.total
+        //       asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+        //       asset.creator = params.creator
+        //       asset.reserve = params.reserve
+        //       asset.url = params.url
+        //       // console.debug("Asset after: ", JSON.stringify(asset))
+        //     } catch (e) {
+        //       console.error(`Error fetching asset ${asset.id} info: `, e)
+        //       asset.name = "[Deleted Asset]"
+        //       asset.unitName = "N/A"
+        //     }
+        //   }
+        //   setNumAssetsLoaded((n) => n + 1)
+        // }
+
+        // Goes too fast for free AlgoNode with large numbers of assets; converted to for loop above
         // await Promise.all(
         //   assets.map(async (asset) => {
         //     if (asset.id > 0) {
