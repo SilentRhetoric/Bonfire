@@ -35,8 +35,9 @@
     "@tanstack/solid-table": "^8.11.6",
     "algosdk": "^2.7.0",
     "axios": "^1.6.5",
+    "limiter": "^2.1.0",
     "multiformats": "^13.0.1",
-    "solid-algo-wallets": "^0.1.6",
+    "solid-algo-wallets": "^0.1.7",
     "solid-js": "^1.8.11"
   }
 }

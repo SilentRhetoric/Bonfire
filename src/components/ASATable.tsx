@@ -7,7 +7,7 @@ import {
   CellContext,
 } from "@tanstack/solid-table"
 import { AssetData, UseNetwork } from "solid-algo-wallets"
-import { Component, For, createComputed, createEffect, createMemo, createSignal } from "solid-js"
+import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import useBonfire from "../lib/useBonfire"
 import { ASAImage } from "./ASAImage"
@@ -54,7 +54,7 @@ export const ASATable: Component = () => {
   //   console.debug("accountAsssets in component: ", JSON.stringify(accountAssets)),
   // )
   // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
-  createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
+  // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
 
   const columns = [
     {
@@ -103,10 +103,19 @@ export const ASATable: Component = () => {
         // createComputed(() => console.debug("value: ", value()))
 
         // When the input is blurred, we'll call our table meta's updateData function
+        // if the input value is different from the original decimalAmount value
         const onBlur = () => {
-          if (0 < value() && value() <= c.row.original.amount) {
+          if (value() == c.row.original.decimalAmount) {
+            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            // console.debug("Not updating data: ", value())
+            return
+          } else if (0 < value() && value() < c.row.original.decimalAmount) {
+            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            // console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
           } else {
+            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            // console.debug("Updating data 2: ", c.row.original.decimalAmount)
             c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
             setValue(c.row.original.decimalAmount)
           }
@@ -118,11 +127,13 @@ export const ASATable: Component = () => {
             target: HTMLInputElement
           },
         ) => {
+          // console.debug("e.target.value: ", e.target.value)
           setValue(Number(e.target.value))
         }
 
-        // If the initialValue is changed external, sync it up with our state
+        // If the initialValue is changed externally, sync it up with our state
         createEffect(() => {
+          // console.debug("initialValue: ", initialValue)
           setValue(initialValue)
         })
 
@@ -131,7 +142,7 @@ export const ASATable: Component = () => {
             value={value()}
             onChange={onChange}
             onBlur={onBlur}
-            class="input input-xs w-24 text-right text-sm"
+            class="input input-xs w-28 text-right text-sm"
             type="number"
             max={c.row.original.decimalAmount}
             min={0}
