@@ -33,8 +33,8 @@ function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
 
 function useBonfire() {
   // Use reactive roots to compose app state
-  const { transactionSigner } = UseSolidAlgoWallets
-  const address = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
+  const { address, transactionSigner } = UseSolidAlgoWallets
+  // const address = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const { algodClient, getAccountInfo, activeNetwork } = UseNetwork
   const [algoBalance, setAlgoBalance] = createSignal(0)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
@@ -85,7 +85,7 @@ function useBonfire() {
         ]
 
         // Throttle API requests to to kind to Urtho's free API
-        const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 100 })
+        const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 50 })
         await Promise.all(
           assets.map(async (asset) => {
             if (asset.id > 0) {
