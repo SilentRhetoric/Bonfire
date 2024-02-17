@@ -44,9 +44,8 @@ const IndeterminateCheckbox: Component<{
 }
 
 export const ASATable: Component = () => {
-  const { accountAssets, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
+  const { burnableAsas, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
     useBonfire
-  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
 
   const { getAsaUrl } = UseNetwork
 

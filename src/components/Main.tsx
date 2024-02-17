@@ -1,5 +1,5 @@
 import { UseNetwork, UseSolidAlgoWallets } from "solid-algo-wallets"
-import { For, Show, createMemo, createSignal, onMount } from "solid-js"
+import { For, Show, createComputed, createMemo, createSignal, onMount } from "solid-js"
 import useBonfire from "../lib/useBonfire"
 import {
   AtomicTransactionComposer,
@@ -23,7 +23,7 @@ export default function Main() {
   const { algodClient, getAppUrl, getTxUrl, activeNetwork } = UseNetwork
   const {
     bonfireAppId,
-    accountAssets,
+    burnableAsas,
     rowSelection,
     bonfireAddr,
     bonfireClient,
@@ -44,6 +44,15 @@ export default function Main() {
   const [waitingBurn, setWaitingBurn] = createSignal(false)
   const [waitingDonate, setWaitingDonate] = createSignal(false)
 
+  createComputed(() => {
+    // console.debug("activeWallet: ", activeWallet())
+    if (activeWallet() == undefined) {
+      setWaitingBurn(false)
+      setWaitingDonate(false)
+      setConfirmedTxn("")
+    }
+  })
+
   async function burn() {
     setWaitingBurn(true)
     setConfirmedTxn("")
@@ -54,12 +63,12 @@ export default function Main() {
       suggestedParams.fee = suggestedParams.minFee
       // console.debug("suggestedParams: ", suggestedParams)
 
-      console.debug("rowSelection: ", rowSelection())
+      // console.debug("rowSelection: ", rowSelection())
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
-        assetsToBurn.push(accountAssets[Number(k)])
+        assetsToBurn.push(burnableAsas()[Number(k)])
       })
-      console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
+      // console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
 
       if (assetsToBurn.length > 0) {
         let slots = 0
@@ -97,7 +106,7 @@ export default function Main() {
             closeRemainderTo: closeRemainderAddr,
             suggestedParams,
           })
-          console.debug("axfer: ", axfer.prettyPrint())
+          // console.debug("axfer: ", axfer.prettyPrint())
           axfers.push(axfer)
           slots = slots + 1
         }
@@ -317,6 +326,10 @@ export default function Main() {
           </div>
         </Show>
       </div>
+      {/* <div>
+        <pre>{JSON.stringify(rowSelection(), null, 2)}</pre>
+        <pre>{JSON.stringify(accountAssets, null, 2)}</pre>
+      </div> */}
     </main>
   )
 }

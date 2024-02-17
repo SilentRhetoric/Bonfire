@@ -224,6 +224,8 @@ function useBonfire() {
     ),
   )
 
+  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
+
   const group = createMemo(() => {
     let numTxns = 0
     let numOptIns = 0
@@ -234,7 +236,7 @@ function useBonfire() {
     if (Object.entries(rowSelection()).length > 0) {
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
-        assetsToBurn.push(accountAssets[Number(k)])
+        assetsToBurn.push(burnableAsas()[Number(k)])
       })
 
       for (let i = 0; i < assetsToBurn.length; i++) {
@@ -304,6 +306,7 @@ function useBonfire() {
     setAccountInfo,
     accountAssets,
     setAccountAssets,
+    burnableAsas,
     sorting,
     setSorting,
     rowSelection,
