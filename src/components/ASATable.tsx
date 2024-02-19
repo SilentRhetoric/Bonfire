@@ -44,8 +44,15 @@ const IndeterminateCheckbox: Component<{
 }
 
 export const ASATable: Component = () => {
-  const { burnableAsas, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
-    useBonfire
+  const {
+    // burnableAsas,
+    accountAssets,
+    setAccountAssets,
+    sorting,
+    setSorting,
+    rowSelection,
+    setRowSelection,
+  } = useBonfire
 
   const { getAsaUrl } = UseNetwork
 
@@ -58,23 +65,25 @@ export const ASATable: Component = () => {
   const columns = [
     {
       id: "select",
-      header: (data: {
-        table: {
-          getIsAllRowsSelected: () => boolean
-          getIsSomeRowsSelected: () => boolean
-          getToggleAllRowsSelectedHandler: () => unknown
-        }
-      }) => (
-        <IndeterminateCheckbox
-          {...{
-            checked: data.table.getIsAllRowsSelected(),
-            indeterminate: data.table.getIsSomeRowsSelected(),
-            onChange: data.table.getToggleAllRowsSelectedHandler(),
-          }}
-        />
-      ),
+      // Disabling this select all shortcut to avoid unintentional selection of assets
+      // header: (data: {
+      //   table: {
+      //     getIsAllRowsSelected: () => boolean
+      //     getIsSomeRowsSelected: () => boolean
+      //     getToggleAllRowsSelectedHandler: () => unknown
+      //   }
+      // }) => (
+      //   <IndeterminateCheckbox
+      //     {...{
+      //       checked: data.table.getIsAllRowsSelected(),
+      //       indeterminate: data.table.getIsSomeRowsSelected(),
+      //       onChange: data.table.getToggleAllRowsSelectedHandler(),
+      //     }}
+      //   />
+      // ),
       cell: (data: {
         row: {
+          original: BonfireAssetData
           getIsSelected: () => boolean
           getCanSelect: () => boolean
           getIsSomeSelected: () => boolean
@@ -84,7 +93,7 @@ export const ASATable: Component = () => {
         <IndeterminateCheckbox
           {...{
             checked: data.row.getIsSelected(),
-            disabled: !data.row.getCanSelect(),
+            disabled: !data.row.getCanSelect() || data.row.original.frozen === true,
             indeterminate: data.row.getIsSomeSelected(),
             onChange: data.row.getToggleSelectedHandler(),
           }}
@@ -112,6 +121,7 @@ export const ASATable: Component = () => {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
+            // console.debug("row: ", c.row)
           } else {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 2: ", c.row.original.decimalAmount)
@@ -136,6 +146,8 @@ export const ASATable: Component = () => {
           setValue(initialValue)
         })
 
+        const disabled = c.row.original.frozen === true
+
         return (
           <input
             value={value()}
@@ -147,6 +159,7 @@ export const ASATable: Component = () => {
             min={0}
             name="Asset amount"
             aria-label="Asset amount"
+            disabled={disabled}
           />
         )
       },
@@ -204,7 +217,7 @@ export const ASATable: Component = () => {
   const table = createMemo(() => {
     return createSolidTable({
       debugTable: true,
-      data: burnableAsas(),
+      data: accountAssets,
       // @ts-expect-error Complains that the SVG isn't a valid header for the image column
       columns,
       getCoreRowModel: getCoreRowModel(),
@@ -234,8 +247,9 @@ export const ASATable: Component = () => {
             // This method replaces the whole array which makes it reactive
             (prev) => {
               // console.debug("prev: ", prev)
-              let modified = []
-              modified = prev.map((row, index) => {
+              let modifiedArray = []
+              modifiedArray = prev.map((row, index) => {
+                // console.debug("row: ", row)
                 if (index === rowIndex) {
                   return {
                     ...prev[rowIndex]!,
@@ -244,8 +258,8 @@ export const ASATable: Component = () => {
                 }
                 return row
               })
-              // console.debug("modified: ", modified)
-              return modified
+              // console.debug("modifiedArray: ", modifiedArray)
+              return modifiedArray
             },
           )
         },

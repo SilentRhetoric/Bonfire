@@ -17,19 +17,20 @@ export const BONFIRE_APP_IDS = {
   LocalNet: 1013,
 }
 
-function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
-  return {
-    id: 0,
-    amount: amt,
-    frozen: false,
-    decimals: 6,
-    name: "ALGO",
-    unitName: "ALGO",
-    total: 10000000000000000,
-    decimalAmount: numberToDecimal(amt, 6),
-    creator: "",
-  }
-}
+// Don't need this as Algo balance is not being put into the assets array
+// function makeAlgoAssetDataObj(amt: number): BonfireAssetData {
+//   return {
+//     id: 0,
+//     amount: amt,
+//     frozen: false,
+//     decimals: 6,
+//     name: "ALGO",
+//     unitName: "ALGO",
+//     total: 10000000000000000,
+//     decimalAmount: numberToDecimal(amt, 6),
+//     creator: "",
+//   }
+// }
 
 function useBonfire() {
   // Use reactive roots to compose app state
@@ -85,7 +86,7 @@ function useBonfire() {
         ]
 
         // Throttle API requests to to kind to Urtho's free API
-        const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 50 })
+        const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 20 })
         await Promise.all(
           assets.map(async (asset) => {
             if (asset.id > 0) {
@@ -169,7 +170,8 @@ function useBonfire() {
         setAccountAssets(assets)
         setLoadingAccountInfo(false)
       } catch (e) {
-        setAccountAssets([makeAlgoAssetDataObj(0)])
+        setAlgoBalance(0)
+        setAccountAssets([])
         console.error("Error fetching account info: ", e)
         setLoadingAccountInfo(false)
         setNumAssets(0)
@@ -212,7 +214,8 @@ function useBonfire() {
         if (address() === "") {
           await getBonfireInfo()
           setRowSelection({})
-          setAccountAssets([makeAlgoAssetDataObj(0)])
+          setAlgoBalance(0)
+          setAccountAssets([])
           return
         } else {
           await getBonfireInfo()
@@ -224,7 +227,7 @@ function useBonfire() {
     ),
   )
 
-  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
+  // const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
 
   const group = createMemo(() => {
     let numTxns = 0
@@ -236,7 +239,7 @@ function useBonfire() {
     if (Object.entries(rowSelection()).length > 0) {
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
-        assetsToBurn.push(burnableAsas()[Number(k)])
+        assetsToBurn.push(accountAssets[Number(k)])
       })
 
       for (let i = 0; i < assetsToBurn.length; i++) {
@@ -306,7 +309,7 @@ function useBonfire() {
     setAccountInfo,
     accountAssets,
     setAccountAssets,
-    burnableAsas,
+    // burnableAsas,
     sorting,
     setSorting,
     rowSelection,

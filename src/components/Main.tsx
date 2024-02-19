@@ -22,8 +22,9 @@ export default function Main() {
     UseSolidAlgoWallets
   const { algodClient, getAppUrl, getTxUrl, activeNetwork } = UseNetwork
   const {
+    accountAssets,
     bonfireAppId,
-    burnableAsas,
+    // burnableAsas,
     rowSelection,
     bonfireAddr,
     bonfireClient,
@@ -66,7 +67,7 @@ export default function Main() {
       // console.debug("rowSelection: ", rowSelection())
       const assetsToBurn: BonfireAssetData[] = []
       Object.entries(rowSelection()).forEach(([k]) => {
-        assetsToBurn.push(burnableAsas()[Number(k)])
+        assetsToBurn.push(accountAssets[Number(k)])
       })
       // console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
 
@@ -177,6 +178,12 @@ export default function Main() {
       setWaitingDonate(false)
     }
   }
+
+  // createComputed(() => {
+  //   console.debug("activeWallet: ", activeWallet())
+  //   console.debug("rowSelection: ", rowSelection())
+  //   console.debug("groupOverFull: ", groupOverFull())
+  // })
 
   return (
     <main class="mb-auto min-h-[calc(100vh-234px)] bg-gradient-to-b from-base-300 to-base-100">
