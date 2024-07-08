@@ -45,7 +45,7 @@ The smart contract used for burning is documented in the [ARC-54](https://arc.al
 
 The smart contract is deployed with the following IDs on each publish network:
 
-- MainNet: 1305959747
+- MainNet: 1257620981
 - TestNet: 497806551
 - BetaNet: 2019020358
 
