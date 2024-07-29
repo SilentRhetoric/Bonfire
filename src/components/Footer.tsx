@@ -1,4 +1,4 @@
-import algonode from "../assets/algonode.png"
+import nodely from "../assets/nodely.png"
 
 export default function Footer() {
   return (
@@ -38,16 +38,16 @@ export default function Footer() {
         <p class="ml-2 flex text-sm">Contribute to this open source project</p>
       </a>
       <a
-        href="https://algonode.io"
+        href="https://nodely.io/"
         target="_blank"
         class="flex flex-row items-center"
       >
         <img
-          src={algonode}
-          alt="AlgoNode"
-          class="m-[-3px] h-8 w-8"
+          src={nodely}
+          alt="Nodely"
+          class="h-6 w-6"
         />
-        <p class="ml-2 text-sm">Powered by AlgoNode</p>
+        <p class="ml-2 text-sm">Powered by Nodely</p>
       </a>
     </footer>
   )

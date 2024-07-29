@@ -1,4 +1,4 @@
-import { BONFIRE_APP_IDS } from "../lib/useBonfire"
+import { BONFIRE_APP_IDS } from "../lib/networks"
 
 export default function About() {
   return (
@@ -79,9 +79,9 @@ export default function About() {
         the smart contract can also be called by other smart contracts, if desired.
       </p>
       <p>The smart contract is deployed with the following IDs on each public network:</p>
-      <li>MainNet: {BONFIRE_APP_IDS.MainNet}</li>
-      <li>TestNet: {BONFIRE_APP_IDS.TestNet}</li>
-      <li>BetaNet: {BONFIRE_APP_IDS.BetaNet}</li>
+      <li>MainNet: {BONFIRE_APP_IDS.mainnet}</li>
+      <li>TestNet: {BONFIRE_APP_IDS.testnet}</li>
+      <li>BetaNet: {BONFIRE_APP_IDS.betanet}</li>
       <h3>Pay it forward</h3>
       <p>
         It costs 0.1A for the smart contract to opt into each ASA. The interface displays how many

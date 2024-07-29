@@ -6,8 +6,8 @@ import { CID } from "multiformats/cid"
 import * as digest from "multiformats/hashes/digest"
 import * as mfsha2 from "multiformats/hashes/sha2"
 
-export function ellipseString(string = "", width = 4): string {
-  return `${string.slice(0, width)}...${string.slice(-width)}`
+export function ellipseString(string: string | null): string {
+  return string ? `${string.slice(0, 3)}...${string.slice(-3)}` : ""
 }
 
 // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
