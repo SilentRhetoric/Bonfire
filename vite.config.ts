@@ -1,13 +1,19 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
-import eslint from "vite-plugin-eslint"
 
 export default defineConfig({
-  plugins: [solidPlugin(), eslint()],
-  server: {
-    port: 3000,
+  plugins: [solidPlugin()],
+  optimizeDeps: {
+    include: [
+      '@perawallet/connect', 
+      '@blockshake/defly-connect',
+      '@walletconnect/modal',
+      '@walletconnect/sign-client'
+    ],
   },
   build: {
-    target: "esnext",
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
 })

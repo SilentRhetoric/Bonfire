@@ -1,11 +1,12 @@
 import { useWallet } from "@txnlab/use-wallet-solid"
-import { For, Show, createComputed, createMemo, createSignal, on, onMount } from "solid-js"
+import { For, Show, createComputed, createMemo, createSignal, on } from "solid-js"
 import { AccountInfo, BonfireAssetData } from "../lib/types"
 import {
   AtomicTransactionComposer,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
   getApplicationAddress,
+  Algodv2,
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
@@ -13,7 +14,7 @@ import { calcExtraLogs, makeIntegerAmount, numberToDecimal } from "../lib/utilit
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import About from "./About"
 import { AlloIcon } from "./Icons"
-import { BONFIRE_APP_IDS, getAppUrl, getTxUrl } from "../lib/networks"
+import { BONFIRE_APP_IDS, getAppUrl, getTxUrl, networkConfigs } from "../lib/networks"
 import { Arc54Client } from "../lib/Arc54Client"
 import { createStore } from "solid-js/store"
 import { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account"
@@ -28,23 +29,17 @@ type MainProps = {
 
 export default function Main(props: MainProps) {
   const {
-    algodClient,
-    activeAccount,
     activeAddress,
     activeNetwork,
-    // setActiveNetwork,
-    activeWallet,
-    activeWalletAccounts,
-    activeWalletAddresses,
     transactionSigner,
     wallets,
+    // activeAccount,
+    // activeWallet,
+    // activeWalletAccounts,
+    // activeWalletAddresses,
   } = useWallet()
 
-  // onMount(() => reconnectWallet()) // TODO: Not clear yet how to reconnect
-  // onMount(() => getBonfireInfo())
-  onMount(() => getBonfireInfo())
-
-  console.debug("wallets: ", wallets)
+  // console.debug("wallets: ", wallets)
 
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const [algoBalance, setAlgoBalance] = createSignal(0)
@@ -67,6 +62,15 @@ export default function Main(props: MainProps) {
     addr: activeAddress()!,
     signer: transactionSigner,
   }))
+
+  const algodClient = createMemo(() => {
+    const config = networkConfigs[activeNetwork()]
+    const token = config.algodToken ? config.algodToken : ""
+    const server = config.algodServer ? config.algodServer : ""
+    const port = config.algodPort ? config.algodPort : ""
+    return new Algodv2(token, server, port)
+  })
+
   const appDetails = createMemo<AppDetails>(() => {
     return {
       sender: transactionSignerAccount(),
@@ -113,6 +117,7 @@ export default function Main(props: MainProps) {
         const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 20 })
         await Promise.all(
           assets.map(async (asset) => {
+            // Investigate if this solid/reactivity warning is a problem
             if (asset.id > 0) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -154,33 +159,35 @@ export default function Main(props: MainProps) {
   }
 
   const getBonfireInfo = async () => {
-    console.debug("getBonfireInfo")
+    // console.debug("getBonfireInfo")
     try {
-      console.debug("algodClient3: ", JSON.stringify(algodClient()))
-      const bonfireInfo = await algodClient().accountInformation(bonfireAddr()).do()
-      console.debug("bonfireInfo: ", bonfireInfo)
+      // console.debug("algodClient3: ", JSON.stringify(algodClient()))
+      const client = algodClient()
+      const bonfireInfo = await client.accountInformation(bonfireAddr()).do()
+      // console.debug("bonfireInfo: ", bonfireInfo)
       setBonfireInfo(bonfireInfo as AccountInfo)
     } catch (e) {
       console.error("Error fetching Bonfire info: ", e)
     }
   }
 
-  createComputed(
-    on(activeNetwork, () =>
-      console.debug("Network changed GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
-    ),
-  )
+  // createComputed(
+  //   on(activeNetwork, () =>
+  //     console.debug("Network changed GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
+  //   ),
+  // )
 
-  createComputed(
-    on(algodClient, () =>
-      console.debug("ALGOD CHANGED - GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
-    ),
-  )
+  // createComputed(
+  //   on(algodClient, () =>
+  //     console.debug("ALGOD CHANGED - GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
+  //   ),
+  // )
+
   createComputed(
     on(
       [activeAddress, activeNetwork, confirmedTxn],
       async () => {
-        console.debug("algodClient2: ", JSON.stringify(algodClient()))
+        // console.debug("algodClient2: ", JSON.stringify(algodClient()))
 
         if (activeAddress() === null) {
           await getBonfireInfo()
@@ -194,7 +201,7 @@ export default function Main(props: MainProps) {
           await fetchAccountInfo()
         }
       },
-      { defer: true },
+      { defer: false },
     ),
   )
 
@@ -315,15 +322,19 @@ export default function Main(props: MainProps) {
           const closeRemainderAddr = await closeRemainder(assetToBurn)
           // console.debug("closeRemainderAddr: ", closeRemainderAddr)
 
-          const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const axferObj: any = {
             from: activeAddress()!,
             to: bonfireAddr(),
             assetIndex: assetToBurn.id,
             amount: makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn),
-            closeRemainderTo: closeRemainderAddr,
             suggestedParams,
-          })
-          // console.debug("axfer: ", axfer.prettyPrint())
+          }
+          if (closeRemainderAddr) {
+            axferObj.closeRemainderTo = closeRemainderAddr
+          }
+          const axfer = makeAssetTransferTxnWithSuggestedParamsFromObject(axferObj)
+          // console.debug("axfer: ", axfer)
           axfers.push(axfer)
           slots = slots + 1
         }
@@ -356,6 +367,7 @@ export default function Main(props: MainProps) {
         axfers.forEach((txn) => {
           group.addTransaction(txn)
         })
+        // console.debug("group: ", group)
 
         // Sign & send the transaction group
         const result = await group.execute()
@@ -516,7 +528,15 @@ export default function Main(props: MainProps) {
                 fallback={
                   <div class="flex h-64 w-64 flex-col items-center justify-center gap-8 p-8">
                     <p class="w-64 text-center text-sm italic">
-                      Loading asset data at a rate that is gentle on AlgoNode's free API...
+                      Loading asset data at a rate that is gentle on{" "}
+                      <a
+                        href="https://nodely.io/docs/free/start"
+                        target="_blank"
+                        aria-label="Nodely free API"
+                      >
+                        Nodely's free API
+                      </a>
+                      ...
                     </p>
                     <p class="w-64 text-center text-sm italic">
                       Take a deep breath and remember that burning is irreversible.
@@ -549,7 +569,7 @@ export default function Main(props: MainProps) {
         </div>
       </Show>
       <div>
-        <p>algodClient: {JSON.stringify(algodClient())}</p>
+        {/* <p>algodClient: {JSON.stringify(algodClient())}</p>
         <p>activeAddress: {JSON.stringify(activeAddress())}</p>
         <p>activeNetwork: {activeNetwork()}</p>
         <p>activeWallet: {JSON.stringify(activeWallet()?.name)}</p>
@@ -560,8 +580,6 @@ export default function Main(props: MainProps) {
         <p>infoOpen: {JSON.stringify(props.infoOpen)}</p>
         <p>loadingAccountInfo: {JSON.stringify(loadingAccountInfo())}</p>
         <p>algoBalance: {algoBalance()}</p>
-        {/* <p>accountAssets: {JSON.stringify(accountAssets)}</p> */}
-        {/* <p>bonfireInfo: {JSON.stringify(bonfireInfo)}</p> */}
         <p>rowSelection: {JSON.stringify(rowSelection)}</p>
         <p>confirmedTxn: {confirmedTxn()}</p>
         <p>loadingAccountInfo: {loadingAccountInfo()}</p>
@@ -572,9 +590,10 @@ export default function Main(props: MainProps) {
         <p>waitingBurn: {waitingBurn()}</p>
         <p>waitingDonate: {waitingDonate()}</p>
         <p>bonfireAddr: {bonfireAddr()}</p>
-        {/* <p class="text-xs">bonfireInfo: {JSON.stringify(bonfireInfo())}</p> */}
         <p>group: {JSON.stringify(group())}</p>
         <p>groupOverFull: {groupOverFull()}</p>
+        <p>accountAssets: {JSON.stringify(accountAssets)}</p>
+        <p class="text-xs">bonfireInfo: {JSON.stringify(bonfireInfo())}</p> */}
       </div>
     </main>
   )

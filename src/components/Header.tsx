@@ -1,7 +1,6 @@
 import { For, Show } from "solid-js"
 import { ellipseString } from "../lib/utilities"
-import { useWallet } from "@txnlab/use-wallet-solid"
-import { NetworkId } from "@txnlab/use-wallet-solid"
+import { useWallet, NetworkId } from "@txnlab/use-wallet-solid"
 
 type HeaderProps = {
   infoOpen: boolean
@@ -67,10 +66,10 @@ export default function Header(props: HeaderProps) {
               class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2"
             >
               <For each={activeWalletAddresses()}>
-                {(acc) => (
+                {(addr) => (
                   <li>
-                    <div onClick={() => activeWallet()!.setActiveAccount(acc)}>
-                      {ellipseString(acc)}
+                    <div onClick={() => activeWallet()!.setActiveAccount(addr)}>
+                      {ellipseString(addr)}
                     </div>
                   </li>
                 )}

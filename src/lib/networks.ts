@@ -53,7 +53,7 @@ const LOCALNET_CONFIG: NetworkConfig = {
   blockExplorer: LOCALNET_BLOCK_EXPLORER,
 }
 
-const networkConfigs: NetworkConfigs = {
+export const networkConfigs: NetworkConfigs = {
   mainnet: MAINNET_CONFIG,
   testnet: TESTNET_CONFIG,
   betanet: BETANET_CONFIG,

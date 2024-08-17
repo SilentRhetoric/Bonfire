@@ -10,18 +10,17 @@ const walletManager = new WalletManager({
     WalletId.PERA,
     WalletId.DEFLY,
     WalletId.EXODUS,
-    {
-      id: WalletId.WALLETCONNECT,
-      options: { projectId: "d9cef016ef56cf53a72d549e5898f348" },
-    },
+    // {
+    //   id: WalletId.WALLETCONNECT,
+    //   options: { projectId: "d9cef016ef56cf53a72d549e5898f348" },
+    // },
     {
       id: WalletId.LUTE,
       options: { siteName: "Bonfire" },
     },
-    // WalletId.KIBISIS,
     WalletId.KMD,
   ],
-  network: NetworkId.TESTNET, // TODO: How can we have this loaded from localStorage?
+  network: NetworkId.TESTNET,
 })
 
 const App: Component = () => {
