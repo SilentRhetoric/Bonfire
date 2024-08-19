@@ -10,7 +10,7 @@ import {
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { calcExtraLogs, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
+import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import About from "./About"
 import { AlloIcon } from "./Icons"
@@ -350,7 +350,7 @@ export default function Main(props: MainProps) {
             amount: 100000 * numMBRPayments,
             suggestedParams,
           })
-          // console.debug("payTxn: ", payTxn.prettyPrint())
+          // console.debug("payTxn: ", payTxn)
           group.addTransaction(payTxn)
         }
 
@@ -521,7 +521,9 @@ export default function Main(props: MainProps) {
             }
           >
             <div class="flex flex-col items-center gap-2 md:w-2/3">
-              <h2 class="text-center text-2xl">Your Burnable Assets</h2>
+              <h2 class="text-center text-2xl">
+                Burnable Assets in {ellipseString(activeAddress())}
+              </h2>
               <Show
                 when={!loadingAccountInfo()}
                 fallback={
@@ -568,14 +570,13 @@ export default function Main(props: MainProps) {
         </div>
       </Show>
       <div>
-        {/* <p>algodClient: {JSON.stringify(algodClient())}</p>
-        <p>activeAddress: {JSON.stringify(activeAddress())}</p>
-        <p>activeNetwork: {activeNetwork()}</p>
-        <p>activeWallet: {JSON.stringify(activeWallet()?.name)}</p>
-        <p>activeWalletAccounts: {JSON.stringify(activeWalletAccounts())}</p>
-        <p>activeWalletAddresses: {JSON.stringify(activeWalletAddresses())}</p>
+        {/* <p>activeWallet: {JSON.stringify(activeWallet()?.name)}</p>
         <p>activeAccount: {JSON.stringify(activeAccount())}</p>
         <p>activeAddress: {JSON.stringify(activeAddress())}</p>
+        <p>activeWalletAccounts: {JSON.stringify(activeWalletAccounts())}</p>
+        <p>activeWalletAddresses: {JSON.stringify(activeWalletAddresses())}</p> */}
+        {/* <p>algodClient: {JSON.stringify(algodClient())}</p>
+        <p>activeNetwork: {activeNetwork()}</p>
         <p>infoOpen: {JSON.stringify(props.infoOpen)}</p>
         <p>loadingAccountInfo: {JSON.stringify(loadingAccountInfo())}</p>
         <p>algoBalance: {algoBalance()}</p>

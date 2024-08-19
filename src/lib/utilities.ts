@@ -1,5 +1,4 @@
-import { AccountInfo, AssetData } from "solid-algo-wallets"
-import { BonfireAssetData } from "./types"
+import { AccountInfo, BonfireAssetData } from "./types"
 import { decodeAddress } from "algosdk"
 import axios from "axios"
 import { CID } from "multiformats/cid"
@@ -23,7 +22,7 @@ export function formatNumWithDecimals(num: number, decimals: number): string {
   return shifted_num_string
 }
 
-export function displayAssetAmount(asset: AssetData) {
+export function displayAssetAmount(asset: BonfireAssetData) {
   try {
     return formatNumWithDecimals(asset.amount, asset.decimals)
   } catch (e) {
@@ -31,12 +30,12 @@ export function displayAssetAmount(asset: AssetData) {
   }
 }
 
-export function makeBigIntAmount(decimal_amount: number, asset: AssetData): bigint {
+export function makeBigIntAmount(decimal_amount: number, asset: BonfireAssetData): bigint {
   const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
   return bigIntAmount
 }
 
-export function makeIntegerAmount(decimal_amount: number, asset: AssetData): number {
+export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetData): number {
   const intAmount = decimal_amount * Math.pow(10, asset.decimals)
   return intAmount
 }

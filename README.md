@@ -1,5 +1,3 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/d77b7fd3-cc08-46c6-ae0c-15fce5763f82/deploy-status)](https://app.netlify.com/sites/asa-bonfire/deploys)
-
 # Bonfire 🔥
 
 Bonfire is a tool for burning Algorand Standard Assets (ASA). The live web app can be found at [https://thebonfire.app](https://thebonfire.app).
@@ -7,6 +5,8 @@ Bonfire is a tool for burning Algorand Standard Assets (ASA). The live web app c
 The app utilizes [SolidJS](https://www.solidjs.com) for reactivity, [Vite](https://vitejs.dev) dev tooling, [Tailwind CSS](https://tailwindcss.com) styles, and [daisyUI](https://daisyui.com) components.
 
 This work has been performed with support from the Algorand Foundation xGov Grants Program.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/d77b7fd3-cc08-46c6-ae0c-15fce5763f82/deploy-status)](https://app.netlify.com/sites/asa-bonfire/deploys)
 
 ## What is Bonfire?
 

@@ -12,14 +12,12 @@ declare global {
     readonly VITE_TESTNET_ALGOD_SERVER: string
     readonly VITE_TESTNET_ALGOD_PORT: number
     readonly VITE_TESTNET_BLOCK_EXPLORER:
-      | "https://testnet.algoexplorer.io"
+      | "https://testnet.explorer.perawallet.app/"
       | "https://app.dappflow.org"
     readonly VITE_BETANET_ALGOD_TOKEN: string
     readonly VITE_BETANET_ALGOD_SERVER: string
     readonly VITE_BETANET_ALGOD_PORT: number
-    readonly VITE_BETANET_BLOCK_EXPLORER:
-      | "https://betanet.algoexplorer.io"
-      | "https://app.dappflow.org"
+    readonly VITE_BETANET_BLOCK_EXPLORER: "https://app.dappflow.org"
     readonly VITE_LOCALNET_ALGOD_TOKEN: string
     readonly VITE_LOCALNET_ALGOD_SERVER: string
     readonly VITE_LOCALNET_ALGOD_PORT: number
