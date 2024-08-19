@@ -18,9 +18,9 @@ const walletManager = new WalletManager({
       id: WalletId.LUTE,
       options: { siteName: "Bonfire" },
     },
-    WalletId.KMD,
+    // WalletId.KMD,
   ],
-  network: NetworkId.TESTNET,
+  network: NetworkId.MAINNET,
 })
 
 const App: Component = () => {
