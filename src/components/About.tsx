@@ -97,7 +97,16 @@ export default function About() {
         and the source code is available through the GitHub link in the page footer.
       </p>
       <h3>App Info</h3>
-      <p>Version 1.0.2</p>
+      <p>
+        Version 1.1.0. Wallet connectivity now provided by{" "}
+        <a
+          href="https://github.com/TxnLab/use-wallet"
+          target="_blank"
+        >
+          use-wallet
+        </a>
+        .
+      </p>
     </div>
   )
 }
