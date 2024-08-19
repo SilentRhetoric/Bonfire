@@ -44,7 +44,6 @@ export default function Main(props: MainProps) {
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const [algoBalance, setAlgoBalance] = createSignal(0)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
-  // const [accountInfo, setAccountInfo] = createStore({} as AccountInfo)
   const [bonfireInfo, setBonfireInfo] = createSignal({} as AccountInfo)
   const [rowSelection, setRowSelection] = createSignal<RowSelectionState>({})
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
@@ -116,8 +115,8 @@ export default function Main(props: MainProps) {
         // Throttle API requests to to kind to Urtho's free API
         const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 20 })
         await Promise.all(
+          // eslint-disable-next-line solid/reactivity
           assets.map(async (asset) => {
-            // Investigate if this solid/reactivity warning is a problem
             if (asset.id > 0) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
