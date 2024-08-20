@@ -98,15 +98,16 @@ export default function About() {
       </p>
       <h3>App Info</h3>
       <p>
-        Version 1.1.0. Wallet connectivity now provided by{" "}
+        Wallet interfaces by{" "}
         <a
           href="https://github.com/TxnLab/use-wallet"
           target="_blank"
         >
           use-wallet
         </a>
-        .
+        . Support FOSS with code contributions or sponsorship!
       </p>
+      <p>Version 1.1.0.</p>
     </div>
   )
 }
