@@ -3,19 +3,26 @@ import {
   createSolidTable,
   flexRender,
   getSortedRowModel,
-  RowData,
   CellContext,
+  RowData,
+  SortingState,
+  RowSelectionState,
 } from "@tanstack/solid-table"
-import { AssetData, UseNetwork } from "solid-algo-wallets"
 import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
-import useBonfire from "../lib/useBonfire"
-import { ASAImage } from "./ASAImage"
+import { getAsaUrl } from "../lib/networks"
+import { NetworkId } from "@txnlab/use-wallet-solid"
+import { SetStoreFunction } from "solid-js/store"
+// import { ASAImage } from "./ASAImage"
 
 declare module "@tanstack/solid-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string | keyof AssetData, value: unknown) => void
+    updateData: (
+      rowIndex: number,
+      columnId: string | keyof BonfireAssetData,
+      value: unknown,
+    ) => void
   }
 }
 
@@ -43,15 +50,19 @@ const IndeterminateCheckbox: Component<{
   )
 }
 
-export const ASATable: Component = () => {
-  const { accountAssets, setAccountAssets, sorting, setSorting, rowSelection, setRowSelection } =
-    useBonfire
-  const burnableAsas = createMemo(() => [...accountAssets.filter((a) => a.id > 0 && !a.frozen)])
+type ASATableProps = {
+  accountAssets: BonfireAssetData[]
+  setAccountAssets: SetStoreFunction<BonfireAssetData[]>
+  rowSelection: RowSelectionState
+  setRowSelection: (data: object) => void
+  activeNetwork: NetworkId
+}
 
-  const { getAsaUrl } = UseNetwork
+export const ASATable: Component<ASATableProps> = (props) => {
+  const [sorting, setSorting] = createSignal<SortingState>([])
 
   // createComputed(() =>
-  //   console.debug("accountAsssets in component: ", JSON.stringify(accountAssets)),
+  //   console.debug("accountAssets in component: ", JSON.stringify(accountAssets)),
   // )
   // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
   // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
@@ -59,23 +70,25 @@ export const ASATable: Component = () => {
   const columns = [
     {
       id: "select",
-      header: (data: {
-        table: {
-          getIsAllRowsSelected: () => boolean
-          getIsSomeRowsSelected: () => boolean
-          getToggleAllRowsSelectedHandler: () => unknown
-        }
-      }) => (
-        <IndeterminateCheckbox
-          {...{
-            checked: data.table.getIsAllRowsSelected(),
-            indeterminate: data.table.getIsSomeRowsSelected(),
-            onChange: data.table.getToggleAllRowsSelectedHandler(),
-          }}
-        />
-      ),
+      // Disabling this "Select all" shortcut to avoid unintentional selection of assets
+      // header: (data: {
+      //   table: {
+      //     getIsAllRowsSelected: () => boolean
+      //     getIsSomeRowsSelected: () => boolean
+      //     getToggleAllRowsSelectedHandler: () => unknown
+      //   }
+      // }) => (
+      //   <IndeterminateCheckbox
+      //     {...{
+      //       checked: data.table.getIsAllRowsSelected(),
+      //       indeterminate: data.table.getIsSomeRowsSelected(),
+      //       onChange: data.table.getToggleAllRowsSelectedHandler(),
+      //     }}
+      //   />
+      // ),
       cell: (data: {
         row: {
+          original: BonfireAssetData
           getIsSelected: () => boolean
           getCanSelect: () => boolean
           getIsSomeSelected: () => boolean
@@ -85,7 +98,7 @@ export const ASATable: Component = () => {
         <IndeterminateCheckbox
           {...{
             checked: data.row.getIsSelected(),
-            disabled: !data.row.getCanSelect(),
+            disabled: !data.row.getCanSelect() || data.row.original.frozen === true,
             indeterminate: data.row.getIsSomeSelected(),
             onChange: data.row.getToggleSelectedHandler(),
           }}
@@ -113,6 +126,7 @@ export const ASATable: Component = () => {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
+            // console.debug("row: ", c.row)
           } else {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 2: ", c.row.original.decimalAmount)
@@ -137,44 +151,47 @@ export const ASATable: Component = () => {
           setValue(initialValue)
         })
 
+        const disabled = c.row.original.frozen === true
+
         return (
           <input
             value={value()}
             onChange={onChange}
             onBlur={onBlur}
-            class="input input-xs w-28 text-right text-sm"
+            class="input input-xs w-28 text-right text-xs"
             type="number"
             max={c.row.original.decimalAmount}
             min={0}
             name="Asset amount"
             aria-label="Asset amount"
+            disabled={disabled}
           />
         )
       },
     },
-    {
-      id: "image",
-      accessorKey: "imageSrc",
-      header: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="h-6 w-6"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-          />
-        </svg>
-      ),
-      cell: (c: CellContext<BonfireAssetData, unknown>) => {
-        return <ASAImage asset={c.row.original} />
-      },
-    },
+    // {
+    //   id: "image",
+    //   accessorKey: "imageSrc",
+    //   header: (
+    //     <svg
+    //       xmlns="http://www.w3.org/2000/svg"
+    //       fill="none"
+    //       viewBox="0 0 24 24"
+    //       stroke-width="1.5"
+    //       stroke="currentColor"
+    //       class="h-6 w-6"
+    //     >
+    //       <path
+    //         stroke-linecap="round"
+    //         stroke-linejoin="round"
+    //         d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+    //       />
+    //     </svg>
+    //   ),
+    //   cell: (c: CellContext<BonfireAssetData, unknown>) => {
+    //     return <ASAImage asset={c.row.original} />
+    //   },
+    // },
     {
       accessorKey: "name",
       header: "Name",
@@ -191,7 +208,7 @@ export const ASATable: Component = () => {
       cell: (info: { getValue: () => number }) => {
         return (
           <a
-            href={getAsaUrl(info.getValue())}
+            href={getAsaUrl(info.getValue(), props.activeNetwork)}
             target="_blank"
             aria-label="View asset on Allo"
           >
@@ -205,8 +222,7 @@ export const ASATable: Component = () => {
   const table = createMemo(() => {
     return createSolidTable({
       debugTable: true,
-      data: burnableAsas(),
-      // @ts-expect-error Complains that the SVG isn't a valid header for the image column
+      data: props.accountAssets,
       columns,
       getCoreRowModel: getCoreRowModel(),
       enableRowSelection: true,
@@ -217,26 +233,24 @@ export const ASATable: Component = () => {
         get sorting() {
           return sorting()
         },
-        get rowSelection() {
-          return rowSelection()
-        },
+        rowSelection: props.rowSelection,
       },
-      onRowSelectionChange: setRowSelection,
+      onRowSelectionChange: props.setRowSelection,
       // Provide our updateData function to our table meta
       meta: {
-        updateData: (rowIndex, columnId: string | keyof AssetData, value: unknown) => {
+        updateData: (
+          rowIndex: number,
+          columnId: string | keyof BonfireAssetData,
+          value: unknown,
+        ) => {
           // console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
-          setAccountAssets(
-            // This method updates the store but changing one element isn't reactive
-            // https://www.solidjs.com/docs/latest/api#arrays-in-stores
-            // rowIndex,
-            // columnId as keyof BonfireAssetData,
-            // value,
+          props.setAccountAssets(
             // This method replaces the whole array which makes it reactive
-            (prev) => {
+            (prev: BonfireAssetData[]) => {
               // console.debug("prev: ", prev)
-              let modified = []
-              modified = prev.map((row, index) => {
+              let modifiedArray: BonfireAssetData[] = []
+              modifiedArray = prev.map((row, index) => {
+                // console.debug("row: ", row)
                 if (index === rowIndex) {
                   return {
                     ...prev[rowIndex]!,
@@ -245,8 +259,8 @@ export const ASATable: Component = () => {
                 }
                 return row
               })
-              // console.debug("modified: ", modified)
-              return modified
+              // console.debug("modifiedArray: ", modifiedArray)
+              return modifiedArray
             },
           )
         },
