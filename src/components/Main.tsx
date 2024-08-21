@@ -492,7 +492,7 @@ export default function Main(props: MainProps) {
                   class="w-66 btn btn-ghost"
                   disabled={confirmedTxn().length === 0}
                 >
-                  View Transaction
+                  View Prev. Txn
                   <Show when={activeNetwork() === "mainnet"}>
                     <AlloIcon />
                   </Show>
