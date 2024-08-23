@@ -3,7 +3,7 @@ import { type Component, createSignal, ErrorBoundary } from "solid-js"
 import Main from "./components/Main"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
-import { WalletId, WalletManager, WalletProvider } from "@txnlab/use-wallet-solid"
+import { NetworkId, WalletId, WalletManager, WalletProvider } from "@txnlab/use-wallet-solid"
 
 const walletManager = new WalletManager({
   wallets: [
@@ -20,6 +20,7 @@ const walletManager = new WalletManager({
     },
     // WalletId.KMD,
   ],
+  network: NetworkId.MAINNET,
 })
 
 const App: Component = () => {
