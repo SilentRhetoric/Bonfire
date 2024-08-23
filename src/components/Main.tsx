@@ -28,18 +28,7 @@ type MainProps = {
 }
 
 export default function Main(props: MainProps) {
-  const {
-    activeAddress,
-    activeNetwork,
-    transactionSigner,
-    wallets,
-    // activeAccount,
-    // activeWallet,
-    // activeWalletAccounts,
-    // activeWalletAddresses,
-  } = useWallet()
-
-  // console.debug("wallets: ", wallets)
+  const { activeAddress, activeNetwork, transactionSigner, wallets } = useWallet()
 
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const [algoBalance, setAlgoBalance] = createSignal(0)

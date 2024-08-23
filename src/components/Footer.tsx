@@ -2,7 +2,7 @@ import nodely from "../assets/nodely.png"
 
 export default function Footer() {
   return (
-    <footer class="flex w-full flex-col justify-center gap-2 bg-base-100 p-4 pt-16">
+    <footer class="flex w-full flex-col justify-center gap-2 p-4 pt-16">
       <a
         href="https://x.com/silentrhetoric"
         target="_blank"

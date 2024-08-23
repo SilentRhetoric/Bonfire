@@ -107,7 +107,7 @@ export default function About() {
         </a>
         . Support FOSS with code contributions or sponsorship!
       </p>
-      <p>Version 1.1.0.</p>
+      <p>Version 1.1.1.</p>
     </div>
   )
 }
