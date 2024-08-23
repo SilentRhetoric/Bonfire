@@ -38,7 +38,11 @@ export default function Header(props: HeaderProps) {
             tabIndex={0}
             class="menu dropdown-content z-[2] rounded-box bg-base-100 p-2"
           >
-            <For each={Object.values(NetworkId)}>
+            <For
+              each={Object.values(NetworkId).filter(
+                (n) => n == "mainnet" || n == "testnet" || n == "betanet",
+              )}
+            >
               {(network) => (
                 <li>
                   <button

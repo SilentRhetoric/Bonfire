@@ -61,12 +61,6 @@ type ASATableProps = {
 export const ASATable: Component<ASATableProps> = (props) => {
   const [sorting, setSorting] = createSignal<SortingState>([])
 
-  // createComputed(() =>
-  //   console.debug("accountAssets in component: ", JSON.stringify(accountAssets)),
-  // )
-  // createComputed(() => console.debug("burnableASAs: ", JSON.stringify(burnableAsas())))
-  // createComputed(() => console.debug("rowSelection: ", JSON.stringify(rowSelection())))
-
   const columns = [
     {
       id: "select",

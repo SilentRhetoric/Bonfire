@@ -5,10 +5,10 @@ export default defineConfig({
   plugins: [solidPlugin()],
   optimizeDeps: {
     include: [
-      '@perawallet/connect', 
-      '@blockshake/defly-connect',
-      '@walletconnect/modal',
-      '@walletconnect/sign-client'
+      "@perawallet/connect",
+      "@blockshake/defly-connect",
+      "@walletconnect/modal",
+      "@walletconnect/sign-client",
     ],
   },
   build: {
@@ -16,4 +16,5 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
   },
+  esbuild: { drop: ["console"] },
 })

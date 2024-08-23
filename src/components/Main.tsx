@@ -170,18 +170,6 @@ export default function Main(props: MainProps) {
     }
   }
 
-  // createComputed(
-  //   on(activeNetwork, () =>
-  //     console.debug("Network changed GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
-  //   ),
-  // )
-
-  // createComputed(
-  //   on(algodClient, () =>
-  //     console.debug("ALGOD CHANGED - GOT A NEW ALGODCLIENT! ", JSON.stringify(algodClient())),
-  //   ),
-  // )
-
   createComputed(
     on(
       [activeAddress, activeNetwork, confirmedTxn],
@@ -267,7 +255,7 @@ export default function Main(props: MainProps) {
   })
 
   createComputed(() => {
-    // console.debug("activeWallet: ", activeWallet())
+    // console.debug("activeAddress is null, resetting: ", activeAddress())
     if (activeAddress() == null) {
       setWaitingBurn(false)
       setWaitingDonate(false)
@@ -277,7 +265,7 @@ export default function Main(props: MainProps) {
 
   async function burn() {
     setWaitingBurn(true)
-    setConfirmedTxn("")
+    // setConfirmedTxn("") // May not need to do this
 
     try {
       const bonfireClient = new Arc54Client(appDetails(), algodClient())
@@ -489,7 +477,7 @@ export default function Main(props: MainProps) {
                 aria-label="View transaction"
               >
                 <button
-                  class="w-66 btn btn-ghost"
+                  class="w-66 btn btn-ghost btn-sm"
                   disabled={confirmedTxn().length === 0}
                 >
                   View Prev. Txn
@@ -569,32 +557,6 @@ export default function Main(props: MainProps) {
           </Show>
         </div>
       </Show>
-      <div>
-        {/* <p>activeWallet: {JSON.stringify(activeWallet()?.name)}</p>
-        <p>activeAccount: {JSON.stringify(activeAccount())}</p>
-        <p>activeAddress: {JSON.stringify(activeAddress())}</p>
-        <p>activeWalletAccounts: {JSON.stringify(activeWalletAccounts())}</p>
-        <p>activeWalletAddresses: {JSON.stringify(activeWalletAddresses())}</p> */}
-        {/* <p>algodClient: {JSON.stringify(algodClient())}</p>
-        <p>activeNetwork: {activeNetwork()}</p>
-        <p>infoOpen: {JSON.stringify(props.infoOpen)}</p>
-        <p>loadingAccountInfo: {JSON.stringify(loadingAccountInfo())}</p>
-        <p>algoBalance: {algoBalance()}</p>
-        <p>rowSelection: {JSON.stringify(rowSelection)}</p>
-        <p>confirmedTxn: {confirmedTxn()}</p>
-        <p>loadingAccountInfo: {loadingAccountInfo()}</p>
-        <p>numAssets: {numAssets()}</p>
-        <p>numAssetsLoaded: {numAssetsLoaded()}</p>
-        <p>extraLogs: {extraLogs()}</p>
-        <p>numLogs: {numLogs()}</p>
-        <p>waitingBurn: {waitingBurn()}</p>
-        <p>waitingDonate: {waitingDonate()}</p>
-        <p>bonfireAddr: {bonfireAddr()}</p>
-        <p>group: {JSON.stringify(group())}</p>
-        <p>groupOverFull: {groupOverFull()}</p>
-        <p>accountAssets: {JSON.stringify(accountAssets)}</p>
-        <p class="text-xs">bonfireInfo: {JSON.stringify(bonfireInfo())}</p> */}
-      </div>
     </main>
   )
 }
