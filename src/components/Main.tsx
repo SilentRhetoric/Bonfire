@@ -6,7 +6,6 @@ import {
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
   getApplicationAddress,
-  Algodv2,
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
@@ -14,7 +13,7 @@ import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import About from "./About"
 import { AlloIcon } from "./Icons"
-import { BONFIRE_APP_IDS, getAppUrl, getTxUrl, networkConfigs } from "../lib/networks"
+import { BONFIRE_APP_IDS, getAppUrl, getTxUrl } from "../lib/networks"
 import { Arc54Client } from "../lib/Arc54Client"
 import { createStore } from "solid-js/store"
 import { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account"
@@ -28,7 +27,7 @@ type MainProps = {
 }
 
 export default function Main(props: MainProps) {
-  const { activeAddress, activeNetwork, transactionSigner, wallets } = useWallet()
+  const { activeAddress, activeNetwork, transactionSigner, wallets, algodClient } = useWallet()
 
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
   const [algoBalance, setAlgoBalance] = createSignal(0)
@@ -51,13 +50,14 @@ export default function Main(props: MainProps) {
     signer: transactionSigner,
   }))
 
-  const algodClient = createMemo(() => {
-    const config = networkConfigs[activeNetwork()]
-    const token = config.algodToken ? config.algodToken : ""
-    const server = config.algodServer ? config.algodServer : ""
-    const port = config.algodPort ? config.algodPort : ""
-    return new Algodv2(token, server, port)
-  })
+  // TODO: Use useWallet algodClient
+  // const algodClient = createMemo(() => {
+  // const config = networkConfigs[activeNetwork()]
+  // const token = config.algodToken ? config.algodToken : ""
+  // const server = config.algodServer ? config.algodServer : ""
+  // const port = config.algodPort ? config.algodPort : ""
+  // return new Algodv2(token, server, port)
+  // })
 
   const appDetails = createMemo<AppDetails>(() => {
     return {

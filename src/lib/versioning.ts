@@ -1,5 +1,5 @@
 export function checkAndUpdateVersion() {
-  const currentVersion = "1.1.1"
+  const currentVersion = "1.1.2"
   const storedVersion = localStorage.getItem("version")
 
   if (storedVersion !== currentVersion) {

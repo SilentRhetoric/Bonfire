@@ -24,8 +24,8 @@ importers:
         specifier: ^8.20.1
         version: 8.20.1(solid-js@1.8.21)
       '@txnlab/use-wallet-solid':
-        specifier: ^3.1.5
-        version: 3.1.5(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)
+        specifier: ^3.2.0
+        version: 3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)
       '@walletconnect/modal':
         specifier: ^2.6.2
         version: 2.6.2(react@18.3.1)
@@ -793,8 +793,8 @@ packages:
     resolution: {integrity: sha512-5Ly5TIRHnWH7vSDell9B/OVyV380qqIJVg7H7R7jU4fPEmOD4smqAX7VRflpYI09srWR8aj5OLD2Ccs1pI5mTg==}
     engines: {node: '>=12'}
 
-  '@txnlab/use-wallet-solid@3.1.5':
-    resolution: {integrity: sha512-uQ9Ipb+r1M5YanDdDGUi6XvGR2CWUQ3v1AY5j7MQA1HbWAEoX1EiWnJGW9P9HsQsXV164lu1PInFpPXo1KgX+w==}
+  '@txnlab/use-wallet-solid@3.2.0':
+    resolution: {integrity: sha512-lbqYkybzuclZLlRGGjYsxtlcCFqDjLhYoxDbThkJOBY1P1tII4OEkq9lHO5Z0fTUHafRihQDYJ5j9sUDONltyw==}
     peerDependencies:
       '@blockshake/defly-connect': ^1.1.6
       '@magic-ext/algorand': ^23.0.2
@@ -823,8 +823,8 @@ packages:
       magic-sdk:
         optional: true
 
-  '@txnlab/use-wallet@3.1.5':
-    resolution: {integrity: sha512-AEcwPCL+FO9+tp618ZKAhC1mkvkmDHdlbISDmHQPOS5s+9U4/RkNDfjWLbRjhT+gS8+9kv5gQ+Cj95eZi3PEtg==}
+  '@txnlab/use-wallet@3.2.0':
+    resolution: {integrity: sha512-dsUN2/Lhb1xxGXIU00DRlj8Hmja2QRrZbsBkIKz/ti/m9HoBCA9SBuiVYj6AiE0jJFQ0d/W8eKe0lSW6OA3EDw==}
     peerDependencies:
       '@agoralabs-sh/avm-web-provider': ^1.6.2
       '@blockshake/defly-connect': ^1.1.6
@@ -3376,10 +3376,10 @@ snapshots:
 
   '@tanstack/table-core@8.20.1': {}
 
-  '@txnlab/use-wallet-solid@3.1.5(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)':
+  '@txnlab/use-wallet-solid@3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)':
     dependencies:
       '@tanstack/solid-store': 0.4.1(solid-js@1.8.21)
-      '@txnlab/use-wallet': 3.1.5(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)
+      '@txnlab/use-wallet': 3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)
       algosdk: 2.8.0
     optionalDependencies:
       '@blockshake/defly-connect': 1.1.6(algosdk@2.8.0)
@@ -3391,7 +3391,7 @@ snapshots:
       - '@agoralabs-sh/avm-web-provider'
       - solid-js
 
-  '@txnlab/use-wallet@3.1.5(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)':
+  '@txnlab/use-wallet@3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)':
     dependencies:
       '@tanstack/store': 0.4.1
       algosdk: 2.8.0
