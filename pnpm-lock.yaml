@@ -24,14 +24,14 @@ importers:
         specifier: ^8.20.1
         version: 8.20.1(solid-js@1.8.21)
       '@txnlab/use-wallet-solid':
-        specifier: ^3.2.0
-        version: 3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)
+        specifier: ^3.6.0
+        version: 3.6.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.16.2)(algosdk@2.8.0)(lute-connect@1.4.1)(solid-js@1.8.21)
       '@walletconnect/modal':
         specifier: ^2.6.2
         version: 2.6.2(react@18.3.1)
       '@walletconnect/sign-client':
-        specifier: ^2.15.0
-        version: 2.15.0
+        specifier: ^2.16.2
+        version: 2.16.2
       algosdk:
         specifier: ^2.8.0
         version: 2.8.0
@@ -42,8 +42,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
       lute-connect:
-        specifier: ^1.3.0
-        version: 1.3.0
+        specifier: ^1.4.1
+        version: 1.4.1
       multiformats:
         specifier: ^13.2.2
         version: 13.2.2
@@ -775,8 +775,8 @@ packages:
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
 
-  '@tanstack/solid-store@0.4.1':
-    resolution: {integrity: sha512-pxnABnOz6y+GrxFDMjPoNq8yqjuwBJVEcl4LPkS0FLFz3y3XzoBzUb3cd9zWQAebpIKJtUqfDOqWakkYlgiOsA==}
+  '@tanstack/solid-store@0.5.5':
+    resolution: {integrity: sha512-31UD/UQ7uNG/HRJ5KV12QsAoehmx8LB3oGITaJ2LjeMBY95DLB5elRqWTGj6EwwLKLOWFEGQIz6ksEYM9OIwMw==}
     peerDependencies:
       solid-js: ^1.6.0
 
@@ -786,25 +786,25 @@ packages:
     peerDependencies:
       solid-js: '>=1.3'
 
-  '@tanstack/store@0.4.1':
-    resolution: {integrity: sha512-NvW3MomYSTzQK61AWdtWNIhWgszXFZDRgCNlvSDw/DBaoLqJIlZ0/gKLsditA8un/BGU1NR06+j0a/UNLgXA+Q==}
+  '@tanstack/store@0.5.5':
+    resolution: {integrity: sha512-EOSrgdDAJExbvRZEQ/Xhh9iZchXpMN+ga1Bnk8Nmygzs8TfiE6hbzThF+Pr2G19uHL6+DTDTHhJ8VQiOd7l4tA==}
 
   '@tanstack/table-core@8.20.1':
     resolution: {integrity: sha512-5Ly5TIRHnWH7vSDell9B/OVyV380qqIJVg7H7R7jU4fPEmOD4smqAX7VRflpYI09srWR8aj5OLD2Ccs1pI5mTg==}
     engines: {node: '>=12'}
 
-  '@txnlab/use-wallet-solid@3.2.0':
-    resolution: {integrity: sha512-lbqYkybzuclZLlRGGjYsxtlcCFqDjLhYoxDbThkJOBY1P1tII4OEkq9lHO5Z0fTUHafRihQDYJ5j9sUDONltyw==}
+  '@txnlab/use-wallet-solid@3.6.0':
+    resolution: {integrity: sha512-2QEKg9HPI5FZYkDQqcazPPlt/bUZqDrOqx9jTmMA5csaFwWy0h9LJIHTGZpt7Tg39SpqwRZJvbWt2kvNQ9pvYg==}
     peerDependencies:
       '@blockshake/defly-connect': ^1.1.6
-      '@magic-ext/algorand': ^23.0.2
+      '@magic-ext/algorand': ^23.6.0
       '@perawallet/connect': ^1.3.4
-      '@perawallet/connect-beta': ^2.0.11
+      '@perawallet/connect-beta': ^2.0.14
       '@walletconnect/modal': ^2.6.2
-      '@walletconnect/sign-client': ^2.10.2
+      '@walletconnect/sign-client': ^2.16.1
       algosdk: ^2.7.0
-      lute-connect: ^1.3.0
-      magic-sdk: ^28.0.3
+      lute-connect: ^1.4.1
+      magic-sdk: ^28.6.0
     peerDependenciesMeta:
       '@blockshake/defly-connect':
         optional: true
@@ -823,17 +823,17 @@ packages:
       magic-sdk:
         optional: true
 
-  '@txnlab/use-wallet@3.2.0':
-    resolution: {integrity: sha512-dsUN2/Lhb1xxGXIU00DRlj8Hmja2QRrZbsBkIKz/ti/m9HoBCA9SBuiVYj6AiE0jJFQ0d/W8eKe0lSW6OA3EDw==}
+  '@txnlab/use-wallet@3.6.0':
+    resolution: {integrity: sha512-vy7melYumKuRmwqWYBMvKwSSbV25ztYTHjkBMC1kJFIOdZoxR2fSt5WmZXh/CX7bHX544FAl1qJ4kh/VkgOtrQ==}
     peerDependencies:
       '@agoralabs-sh/avm-web-provider': ^1.6.2
       '@blockshake/defly-connect': ^1.1.6
       '@perawallet/connect': ^1.3.4
-      '@perawallet/connect-beta': ^2.0.11
+      '@perawallet/connect-beta': ^2.0.14
       '@walletconnect/modal': ^2.6.2
-      '@walletconnect/sign-client': ^2.10.2
+      '@walletconnect/sign-client': ^2.16.1
       algosdk: ^2.7.0
-      lute-connect: ^1.3.0
+      lute-connect: ^1.4.1
     peerDependenciesMeta:
       '@agoralabs-sh/avm-web-provider':
         optional: true
@@ -942,8 +942,8 @@ packages:
   '@walletconnect/core@1.8.0':
     resolution: {integrity: sha512-aFTHvEEbXcZ8XdWBw6rpQDte41Rxwnuk3SgTD8/iKGSRTni50gI9S3YEzMj05jozSiOBxQci4pJDMVhIUMtarw==}
 
-  '@walletconnect/core@2.15.0':
-    resolution: {integrity: sha512-QekYQlpxyn2bcQXMkMxo0+v7nUOQKyu3j5ZKzTg/HGU1eSgTRLIvYIEkC8VVflIgOw7meOAb5pFChX51wShksQ==}
+  '@walletconnect/core@2.16.2':
+    resolution: {integrity: sha512-Xf1SqLSB8KffNsgUGDE/CguAcKMD+3EKfqfqNhWpimxe1QDZDUw8xq+nnxfx6MAb8fdx9GYe6Lvknx2SAAeAHw==}
     engines: {node: '>=18'}
 
   '@walletconnect/crypto@1.0.3':
@@ -1011,8 +1011,8 @@ packages:
   '@walletconnect/safe-json@1.0.2':
     resolution: {integrity: sha512-Ogb7I27kZ3LPC3ibn8ldyUr5544t3/STow9+lzz7Sfo808YD7SBWk7SAsdBFlYgP2zDRy2hS3sKRcuSRM0OTmA==}
 
-  '@walletconnect/sign-client@2.15.0':
-    resolution: {integrity: sha512-efwrPfIwKWKeku44TGBCnQqPZGCILI1wBKK9bTF0F0/qrLR/zRe6RWpM3/L4+jOMr/BktxPZ5lRozBh+c2U7Pg==}
+  '@walletconnect/sign-client@2.16.2':
+    resolution: {integrity: sha512-R/hk2P3UN5u3FV22E7h9S/Oy8IbDwaBGH7St/BzOpJCjFmf6CF5S3GZVjrXPBesvRF94CROkqMF89wz5HkZepA==}
 
   '@walletconnect/socket-transport@1.8.0':
     resolution: {integrity: sha512-5DyIyWrzHXTcVp0Vd93zJ5XMW61iDM6bcWT4p8DTRfFsOtW46JquruMhxOLeCOieM4D73kcr3U7WtyR4JUsGuQ==}
@@ -1024,14 +1024,14 @@ packages:
     resolution: {integrity: sha512-Cn+3I0V0vT9ghMuzh1KzZvCkiAxTq+1TR2eSqw5E5AVWfmCtECFkVZBP6uUJZ8YjwLqXheI+rnjqPy7sVM4Fyg==}
     deprecated: 'WalletConnect''s v1 SDKs are now deprecated. Please upgrade to a v2 SDK. For details see: https://docs.walletconnect.com/'
 
-  '@walletconnect/types@2.15.0':
-    resolution: {integrity: sha512-hLffDKKe70jIrK+YcLkAnzi6vqNki1SDBWjV+M/72mKcU2KzXxk0G2STFsWsQDx8DoqxMiuGehd0DlD1jwQmBg==}
+  '@walletconnect/types@2.16.2':
+    resolution: {integrity: sha512-IIV9kQh6b/WpwhfgPixpziE+8XK/FtdnfvN1oOMs5h+lgwr46OJknPY2p7eS6vvdvEP3xMEc1Kbu1i4tlnroiw==}
 
   '@walletconnect/utils@1.8.0':
     resolution: {integrity: sha512-zExzp8Mj1YiAIBfKNm5u622oNw44WOESzo6hj+Q3apSMIb0Jph9X3GDIdbZmvVZsNPxWDL7uodKgZcCInZv2vA==}
 
-  '@walletconnect/utils@2.15.0':
-    resolution: {integrity: sha512-xaazgCMyr5fUPm2QuZ76G+W8beDfKMILqJ3INL6wyuaLil2YQNdsCSvWMNhSP+EZeKD3SUqqBmQaM/maP0YHTg==}
+  '@walletconnect/utils@2.16.2':
+    resolution: {integrity: sha512-CEMxMCIqvwXd8YIEXfBoCiWY8DtUevJ/w14Si+cmTHWHBDWKRZll7+QUXgICIBx5kyX3GMAKNABaTlg2A2CPSg==}
 
   '@walletconnect/window-getters@1.0.0':
     resolution: {integrity: sha512-xB0SQsLaleIYIkSsl43vm8EwETpBzJ2gnzk7e0wMF3ktqiTGS6TFHxcprMl5R44KKh4tCcHCJwolMCaDSwtAaA==}
@@ -1831,8 +1831,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lute-connect@1.3.0:
-    resolution: {integrity: sha512-l8Evm1nub5NjXlUYNfsMerWBQU6BgA3cXsJ+RNVg0jRChkzpc8jhi/dkZzYIZeHIrhn3Reb7Fb5ysY0EqwrFWA==}
+  lute-connect@1.4.1:
+    resolution: {integrity: sha512-mOiu0NzXR4Ep8w8xBBVX3naoM9/VMPudZZWrtRS6pk+g83czfzmoMwlsuzUltC/t+UrNFlSP8xKp2M9bmYtf8Q==}
 
   merge-anything@5.1.7:
     resolution: {integrity: sha512-eRtbOb1N5iyH0tkQDAoQ4Ipsp/5qSR79Dzrz8hEPxRX10RWWR/iQXdoKmBSRCThY1Fh5EhISDtpSc93fpxUniQ==}
@@ -3362,9 +3362,9 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.4.10
 
-  '@tanstack/solid-store@0.4.1(solid-js@1.8.21)':
+  '@tanstack/solid-store@0.5.5(solid-js@1.8.21)':
     dependencies:
-      '@tanstack/store': 0.4.1
+      '@tanstack/store': 0.5.5
       solid-js: 1.8.21
 
   '@tanstack/solid-table@8.20.1(solid-js@1.8.21)':
@@ -3372,35 +3372,35 @@ snapshots:
       '@tanstack/table-core': 8.20.1
       solid-js: 1.8.21
 
-  '@tanstack/store@0.4.1': {}
+  '@tanstack/store@0.5.5': {}
 
   '@tanstack/table-core@8.20.1': {}
 
-  '@txnlab/use-wallet-solid@3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)(solid-js@1.8.21)':
+  '@txnlab/use-wallet-solid@3.6.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.16.2)(algosdk@2.8.0)(lute-connect@1.4.1)(solid-js@1.8.21)':
     dependencies:
-      '@tanstack/solid-store': 0.4.1(solid-js@1.8.21)
-      '@txnlab/use-wallet': 3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)
+      '@tanstack/solid-store': 0.5.5(solid-js@1.8.21)
+      '@txnlab/use-wallet': 3.6.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.16.2)(algosdk@2.8.0)(lute-connect@1.4.1)
       algosdk: 2.8.0
     optionalDependencies:
       '@blockshake/defly-connect': 1.1.6(algosdk@2.8.0)
       '@perawallet/connect': 1.3.4(algosdk@2.8.0)
       '@walletconnect/modal': 2.6.2(react@18.3.1)
-      '@walletconnect/sign-client': 2.15.0
-      lute-connect: 1.3.0
+      '@walletconnect/sign-client': 2.16.2
+      lute-connect: 1.4.1
     transitivePeerDependencies:
       - '@agoralabs-sh/avm-web-provider'
       - solid-js
 
-  '@txnlab/use-wallet@3.2.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.15.0)(algosdk@2.8.0)(lute-connect@1.3.0)':
+  '@txnlab/use-wallet@3.6.0(@blockshake/defly-connect@1.1.6(algosdk@2.8.0))(@perawallet/connect@1.3.4(algosdk@2.8.0))(@walletconnect/modal@2.6.2(react@18.3.1))(@walletconnect/sign-client@2.16.2)(algosdk@2.8.0)(lute-connect@1.4.1)':
     dependencies:
-      '@tanstack/store': 0.4.1
+      '@tanstack/store': 0.5.5
       algosdk: 2.8.0
     optionalDependencies:
       '@blockshake/defly-connect': 1.1.6(algosdk@2.8.0)
       '@perawallet/connect': 1.3.4(algosdk@2.8.0)
       '@walletconnect/modal': 2.6.2(react@18.3.1)
-      '@walletconnect/sign-client': 2.15.0
-      lute-connect: 1.3.0
+      '@walletconnect/sign-client': 2.16.2
+      lute-connect: 1.4.1
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -3541,7 +3541,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@walletconnect/core@2.15.0':
+  '@walletconnect/core@2.16.2':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -3554,8 +3554,8 @@ snapshots:
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.15.0
-      '@walletconnect/utils': 2.15.0
+      '@walletconnect/types': 2.16.2
+      '@walletconnect/utils': 2.16.2
       events: 3.3.0
       lodash.isequal: 4.5.0
       uint8arrays: 3.1.0
@@ -3716,16 +3716,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.15.0':
+  '@walletconnect/sign-client@2.16.2':
     dependencies:
-      '@walletconnect/core': 2.15.0
+      '@walletconnect/core': 2.16.2
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.15.0
-      '@walletconnect/utils': 2.15.0
+      '@walletconnect/types': 2.16.2
+      '@walletconnect/utils': 2.16.2
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -3760,7 +3760,7 @@ snapshots:
 
   '@walletconnect/types@1.8.0': {}
 
-  '@walletconnect/types@2.15.0':
+  '@walletconnect/types@2.16.2':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
@@ -3794,7 +3794,7 @@ snapshots:
       js-sha3: 0.8.0
       query-string: 6.13.5
 
-  '@walletconnect/utils@2.15.0':
+  '@walletconnect/utils@2.16.2':
     dependencies:
       '@stablelib/chacha20poly1305': 1.0.1
       '@stablelib/hkdf': 1.0.1
@@ -3802,9 +3802,10 @@ snapshots:
       '@stablelib/sha256': 1.0.1
       '@stablelib/x25519': 1.0.3
       '@walletconnect/relay-api': 1.0.11
+      '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.15.0
+      '@walletconnect/types': 2.16.2
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -3835,7 +3836,7 @@ snapshots:
 
   '@walletconnect/window-metadata@1.0.0':
     dependencies:
-      '@walletconnect/window-getters': 1.0.0
+      '@walletconnect/window-getters': 1.0.1
 
   '@walletconnect/window-metadata@1.0.1':
     dependencies:
@@ -4651,7 +4652,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lute-connect@1.3.0: {}
+  lute-connect@1.4.1: {}
 
   merge-anything@5.1.7:
     dependencies:
