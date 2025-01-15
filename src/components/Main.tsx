@@ -9,7 +9,7 @@ import {
 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
+import { bigintToDecimal, calcExtraLogs, ellipseString, makeBigIntAmount, numberToDecimal } from "../lib/utilities"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import About from "./About"
 import { AlloIcon } from "./Icons"
@@ -30,9 +30,13 @@ export default function Main(props: MainProps) {
   const { activeAddress, activeNetwork, transactionSigner, wallets, algodClient } = useWallet()
 
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
-  const [algoBalance, setAlgoBalance] = createSignal(0)
+  const [algoBalance, setAlgoBalance] = createSignal<bigint>(0)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
-  const [bonfireInfo, setBonfireInfo] = createSignal({} as AccountInfo)
+  const [bonfireInfo, setBonfireInfo] = createSignal({
+    address: "",
+    amount: BigInt(0),
+    assets: [],
+    "min-balance": 0} as AccountInfo)
   const [rowSelection, setRowSelection] = createSignal<RowSelectionState>({})
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
   const [loadingAccountInfo, setLoadingAccountInfo] = createSignal(false)
@@ -116,8 +120,8 @@ export default function Main(props: MainProps) {
                 asset.name = params.name
                 asset.unitName = params["unit-name"]
                 asset.decimals = params.decimals
-                asset.total = params.total
-                asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+                asset.total = BigInt(params.total)
+                asset.decimalAmount = bigintToDecimal(asset.amount, params.decimals)
                 asset.creator = params.creator
                 asset.reserve = params.reserve
                 asset.url = params.url
@@ -136,7 +140,7 @@ export default function Main(props: MainProps) {
         setAccountAssets(assets)
         setLoadingAccountInfo(false)
       } catch (e) {
-        setAlgoBalance(0)
+        setAlgoBalance(BigInt(0))
         setAccountAssets([])
         console.error("Error fetching account info: ", e)
         setLoadingAccountInfo(false)
@@ -147,12 +151,13 @@ export default function Main(props: MainProps) {
   }
 
   const getBonfireInfo = async () => {
-    // console.debug("getBonfireInfo")
+    console.debug("getBonfireInfo")
     try {
       // console.debug("algodClient3: ", JSON.stringify(algodClient()))
       const client = algodClient()
       const bonfireInfo = await client.accountInformation(bonfireAddr()).do()
-      // console.debug("bonfireInfo: ", bonfireInfo)
+      console.debug("bonfireInfo: ", bonfireInfo)
+      bonfireInfo.amount = BigInt(bonfireInfo.amount)
       setBonfireInfo(bonfireInfo as AccountInfo)
     } catch (e) {
       console.error("Error fetching Bonfire info: ", e)
@@ -168,7 +173,7 @@ export default function Main(props: MainProps) {
         if (activeAddress() === null) {
           await getBonfireInfo()
           setRowSelection({})
-          setAlgoBalance(0)
+          setAlgoBalance(BigInt(0))
           setAccountAssets([])
           return
         } else {
@@ -208,7 +213,7 @@ export default function Main(props: MainProps) {
           numOptIns = numOptIns + 1
         }
 
-        if (makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn) === assetToBurn.amount) {
+        if (makeBigIntAmount(assetToBurn.decimalAmount, assetToBurn) === assetToBurn.amount) {
           if (assetToBurn.creator !== activeAddress()) {
             mbrReduction = mbrReduction + 100000
           }
@@ -289,7 +294,7 @@ export default function Main(props: MainProps) {
           }
 
           const closeRemainder = async (asset: BonfireAssetData) => {
-            if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+            if (makeBigIntAmount(asset.decimalAmount, asset) === asset.amount) {
               if (asset.creator == activeAddress()) {
                 return undefined
               } else return bonfireAddr()
@@ -303,7 +308,7 @@ export default function Main(props: MainProps) {
             from: activeAddress()!,
             to: bonfireAddr(),
             assetIndex: assetToBurn.id,
-            amount: makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn),
+            amount: makeBigIntAmount(assetToBurn.decimalAmount, assetToBurn),
             suggestedParams,
           }
           if (closeRemainderAddr) {

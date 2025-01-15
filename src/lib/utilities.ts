@@ -16,8 +16,8 @@ export function numberWithCommas(num: number | string): string {
   return num_parts.join(".")
 }
 
-export function formatNumWithDecimals(num: number, decimals: number): string {
-  const shifted_num = (num /= Math.pow(10, decimals))
+export function formatNumWithDecimals(num: bigint, decimals: number): string {
+  const shifted_num = (num /= BigInt(Math.pow(10, decimals)))
   const shifted_num_string = shifted_num.toString()
   return shifted_num_string
 }
@@ -40,15 +40,25 @@ export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetDat
   return intAmount
 }
 
+export function bigintToDecimal(num: bigint | undefined, decimals: number): number {
+  console.log("bigintToDecimal",num, decimals)
+  if(!num) return 0
+  const shifted_num = (num = BigInt(num) / BigInt(Math.pow(10, decimals)))
+  console.log("shifted_num",shifted_num)
+  const shifted_num_string = shifted_num
+  return Number(shifted_num_string)
+}
 export function numberToDecimal(num: number, decimals: number): number {
   const shifted_num = (num /= Math.pow(10, decimals))
   const shifted_num_string = shifted_num
-  return shifted_num_string
+  return Number(shifted_num_string)
 }
 
 export function calcExtraLogs(acctInfo: AccountInfo): number {
-  const extraLogs = Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
-  return extraLogs
+  console.log("calcExtraLogs",acctInfo)
+  if(!acctInfo.amount) return 0
+  const extraLogs = (acctInfo.amount - BigInt(acctInfo["min-balance"])) / BigInt(100000)
+  return Number(extraLogs)
 }
 
 export const IPFS_ENDPOINT = "https://ipfs.algonode.xyz/ipfs"

@@ -27,7 +27,7 @@ const App: Component = () => {
   const [infoOpen, setInfoOpen] = createSignal(false)
 
   return (
-    <ErrorBoundary fallback={(err, reset) => <div onClick={reset}>Error: {err.toString()}</div>}>
+    <ErrorBoundary fallback={(err, reset) => <div onClick={reset}>Error: {err.toString()} <pre>{err.stack}</pre></div>}>
       <WalletProvider manager={walletManager}>
         <div class="flex flex-col bg-gradient-to-b from-neutral to-base-100">
           <Header
