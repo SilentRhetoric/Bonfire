@@ -114,7 +114,16 @@ export default function Main(props: MainProps) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const remainingRequests = await limiter.removeTokens(1)
-                console.debug("Asset before: ", JSON.stringify(asset))
+                console.debug(
+                  "Asset before: ",
+                  JSON.stringify(
+                    asset,
+                    (_, v) => {
+                      return typeof v === "bigint" ? v.toString() : v
+                    },
+                    2,
+                  ),
+                )
                 const { params } = await algodClient().getAssetByID(asset.assetId).do()
                 console.debug("params: ", params)
                 asset.name = params.name
@@ -125,7 +134,16 @@ export default function Main(props: MainProps) {
                 asset.creator = params.creator
                 asset.reserve = params.reserve
                 asset.url = params.url
-                console.debug("Asset after: ", JSON.stringify(asset))
+                console.debug(
+                  "Asset after: ",
+                  JSON.stringify(
+                    asset,
+                    (_, v) => {
+                      return typeof v === "bigint" ? v.toString() : v
+                    },
+                    2,
+                  ),
+                )
               } catch (e) {
                 console.error(`Error fetching asset ${asset.assetId} info: `, e)
                 asset.name = "[Deleted Asset]"
@@ -222,7 +240,7 @@ export default function Main(props: MainProps) {
       }
       const extraLogs = calcExtraLogs(bonfireInfo())
       const numMBRPayments = Math.max(numOptIns - extraLogs, 0)
-      console.debug(extraLogs, numMBRPayments)
+      console.debug("extraLogs: ", extraLogs, "numMBRPayments: ", numMBRPayments)
       if (numMBRPayments > 0) {
         payment = payment + numMBRPayments * 100000
         numTxns = numTxns + 1
@@ -274,7 +292,16 @@ export default function Main(props: MainProps) {
       Object.entries(rowSelection()).forEach(([k]) => {
         assetsToBurn.push(accountAssets[Number(k)])
       })
-      console.debug("assetsToBurn: ", JSON.stringify(assetsToBurn))
+      console.debug(
+        "assetsToBurn: ",
+        JSON.stringify(
+          assetsToBurn,
+          (_, v) => {
+            return typeof v === "bigint" ? v.toString() : v
+          },
+          2,
+        ),
+      )
 
       if (assetsToBurn.length > 0) {
         let slots = 0
@@ -306,8 +333,8 @@ export default function Main(props: MainProps) {
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const axferObj: any = {
-            from: activeAddress()!,
-            to: bonfireAddr(),
+            sender: activeAddress()!,
+            receiver: bonfireAddr(),
             assetIndex: assetToBurn.assetId,
             amount: convertToBigInt(assetToBurn.decimalAmount, assetToBurn.decimals),
             suggestedParams,

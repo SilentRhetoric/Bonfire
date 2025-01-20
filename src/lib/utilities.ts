@@ -1,5 +1,5 @@
 import { AccountInfo, BonfireAssetData } from "./types"
-import { decodeAddress, modelsv2 } from "algosdk"
+import { decodeAddress } from "algosdk"
 import axios from "axios"
 import { CID } from "multiformats/cid"
 import * as digest from "multiformats/hashes/digest"
@@ -50,35 +50,10 @@ export function ellipseString(string: string | null): string {
   return string ? `${string.slice(0, 3)}...${string.slice(-3)}` : ""
 }
 
-// https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-export function numberWithCommas(num: number | string): string {
-  const num_parts = num.toString().split(".")
-  num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-  return num_parts.join(".")
-}
-
 export function formatBigIntWithDecimals(num: bigint, decimals: number): string {
   const shifted_num = (num /= BigInt(Math.pow(10, decimals)))
   const shifted_num_string = shifted_num.toString()
   return shifted_num_string
-}
-
-export function displayAssetAmount(asset: BonfireAssetData) {
-  try {
-    return formatBigIntWithDecimals(asset.amount, asset.decimals)
-  } catch (e) {
-    return "0"
-  }
-}
-
-export function makeBigIntAmount(decimal_amount: number, asset: BonfireAssetData): bigint {
-  const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
-  return bigIntAmount
-}
-
-export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetData): number {
-  const intAmount = decimal_amount * Math.pow(10, asset.decimals)
-  return intAmount
 }
 
 export function numberToDecimal(num: number, decimals: number): number {
@@ -92,6 +67,8 @@ export function calcExtraLogs(acctInfo: AccountInfo): number {
   const extraLogs = Math.floor(freeBalance / 100000)
   return extraLogs
 }
+
+// For NFTs with associated data
 
 export const IPFS_ENDPOINT = "https://ipfs.algonode.xyz/ipfs"
 
@@ -184,3 +161,28 @@ export async function getARC19AssetData(url: string, reserve: string) {
     throw new Error("invalid url" + url)
   }
 }
+
+// export function displayAssetAmount(asset: BonfireAssetData) {
+//   try {
+//     return formatBigIntWithDecimals(asset.amount, asset.decimals)
+//   } catch (e) {
+//     return "0"
+//   }
+// }
+
+// export function makeBigIntAmount(decimal_amount: number, asset: BonfireAssetData): bigint {
+//   const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
+//   return bigIntAmount
+// }
+
+// export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetData): number {
+//   const intAmount = decimal_amount * Math.pow(10, asset.decimals)
+//   return intAmount
+// }
+
+// // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+// export function numberWithCommas(num: number | string): string {
+//   const num_parts = num.toString().split(".")
+//   num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+//   return num_parts.join(".")
+// }

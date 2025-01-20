@@ -63,6 +63,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
   const columns = [
     {
       id: "select",
+      header: "🔥",
       cell: (data: {
         row: {
           original: BonfireAssetData
@@ -131,7 +132,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
 
         // If the initialValue is changed externally, sync it up with our state
         createEffect(() => {
-          console.debug("initialValue: ", initialValue)
+          console.debug("Setting initialValue: ", initialValue)
           setValue(initialValue)
         })
 
@@ -262,7 +263,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>
-                      <div class="hover flex items-center justify-center">
+                      <span class="hover flex items-center justify-center">
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
                           asc: (
@@ -294,7 +295,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                             </svg>
                           ),
                         }[header.column.getIsSorted() as string] ?? null}
-                      </div>
+                      </span>
                     </th>
                   )}
                 </For>
