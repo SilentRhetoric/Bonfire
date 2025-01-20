@@ -50,10 +50,45 @@ export function ellipseString(string: string | null): string {
   return string ? `${string.slice(0, 3)}...${string.slice(-3)}` : ""
 }
 
-export function formatBigIntWithDecimals(num: bigint, decimals: number): string {
-  const shifted_num = (num /= BigInt(Math.pow(10, decimals)))
-  const shifted_num_string = shifted_num.toString()
-  return shifted_num_string
+/**
+ * Formats a bigint value with a specified number of decimal places.
+ *
+ * @param value - The bigint value to format.
+ * @param decimalPlaces - The number of decimal places to include in the formatted string.
+ * @returns A string representing the formatted bigint value with the specified number of decimal places.
+ * @throws Will throw an error if the decimalPlaces parameter is a negative integer.
+ */
+export function formatBigIntWithDecimals(value: bigint, decimalPlaces: number): string {
+  if (decimalPlaces < 0) {
+    throw new Error("Decimal places must be a non-negative integer.")
+  }
+
+  const strValue = value.toString()
+
+  if (decimalPlaces === 0) {
+    return strValue // No shift needed
+  }
+
+  const length = strValue.length
+
+  let result: string
+  if (decimalPlaces >= length) {
+    // Add leading zeros if the decimal shift exceeds the number length
+    const leadingZeros = "0".repeat(decimalPlaces - length)
+    result = `0.${leadingZeros}${strValue}`
+  } else {
+    // Insert the decimal point at the correct position
+    const integerPart = strValue.slice(0, length - decimalPlaces)
+    const fractionalPart = strValue.slice(length - decimalPlaces)
+    result = `${integerPart}.${fractionalPart}`
+  }
+
+  // Trim trailing zeros in the fractional part
+  if (result.includes(".")) {
+    result = result.replace(/\.?0+$/, "") // Remove trailing zeros and optional decimal point
+  }
+
+  return result
 }
 
 export function numberToDecimal(num: number, decimals: number): number {

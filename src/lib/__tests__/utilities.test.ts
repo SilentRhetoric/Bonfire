@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { convertToBigInt } from "../utilities"
+import { convertToBigInt, formatBigIntWithDecimals } from "../utilities"
 
 test.each([
   // Simple Algo conversions
@@ -32,10 +32,37 @@ test.each([
   ["1.000000", 0.5, Error("Decimals must be a non-negative integer")],
   ["1.000000", null, Error("Decimals must be a non-negative integer")],
   ["1.000000", undefined, Error("Decimals must be a non-negative integer")],
-])("Convert(%s, %d) -> %s", (input, decimals, output) => {
+])("Str-BigInt(%s, %d) -> %s", (input, decimals, output) => {
   try {
     const resultingBigInt = convertToBigInt(input, decimals)
     expect(resultingBigInt).toBe(output)
+  } catch (e) {
+    expect(e).toEqual(output)
+  }
+})
+
+test.each([
+  // Simple cases
+  [1000000n, 6, "1"],
+  [1000000n, 3, "1000"],
+  [1000001n, 3, "1000.001"],
+  [1000100n, 3, "1000.1"],
+  [1000000n, 0, "1000000"],
+  [1000000000000000000n, 18, "1"],
+  [1234567890123456789n, 18, "1.234567890123456789"],
+  // Leading zeros
+  [1n, 6, "0.000001"],
+  [100000n, 6, "0.1"],
+  [123n, 6, "0.000123"],
+  [123456n, 6, "0.123456"],
+  // No decimal places
+  [123456n, 0, "123456"],
+  // Negative decimal places
+  [1000000n, -1, Error("Decimal places must be a non-negative integer.")],
+])("BigInt-Str(%s, %d) -> %s", (value, decimalPlaces, output) => {
+  try {
+    const formattedString = formatBigIntWithDecimals(value, decimalPlaces)
+    expect(formattedString).toBe(output)
   } catch (e) {
     expect(e).toEqual(output)
   }
