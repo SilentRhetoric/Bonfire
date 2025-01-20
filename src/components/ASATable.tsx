@@ -11,9 +11,8 @@ import {
 import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import { getAsaUrl } from "../lib/networks"
-import { NetworkId } from "@txnlab/use-wallet-solid"
 import { SetStoreFunction } from "solid-js/store"
-// import { ASAImage } from "./ASAImage"
+import { convertToBigInt } from "../lib/utilities"
 
 declare module "@tanstack/solid-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,7 +54,7 @@ type ASATableProps = {
   setAccountAssets: SetStoreFunction<BonfireAssetData[]>
   rowSelection: RowSelectionState
   setRowSelection: (data: object) => void
-  activeNetwork: NetworkId
+  activeNetwork: string
 }
 
 export const ASATable: Component<ASATableProps> = (props) => {
@@ -64,22 +63,6 @@ export const ASATable: Component<ASATableProps> = (props) => {
   const columns = [
     {
       id: "select",
-      // Disabling this "Select all" shortcut to avoid unintentional selection of assets
-      // header: (data: {
-      //   table: {
-      //     getIsAllRowsSelected: () => boolean
-      //     getIsSomeRowsSelected: () => boolean
-      //     getToggleAllRowsSelectedHandler: () => unknown
-      //   }
-      // }) => (
-      //   <IndeterminateCheckbox
-      //     {...{
-      //       checked: data.table.getIsAllRowsSelected(),
-      //       indeterminate: data.table.getIsSomeRowsSelected(),
-      //       onChange: data.table.getToggleAllRowsSelectedHandler(),
-      //     }}
-      //   />
-      // ),
       cell: (data: {
         row: {
           original: BonfireAssetData
@@ -92,7 +75,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
         <IndeterminateCheckbox
           {...{
             checked: data.row.getIsSelected(),
-            disabled: !data.row.getCanSelect() || data.row.original.frozen === true,
+            disabled: !data.row.getCanSelect() || data.row.original.isFrozen === true,
             indeterminate: data.row.getIsSomeSelected(),
             onChange: data.row.getToggleSelectedHandler(),
           }}
@@ -100,23 +83,30 @@ export const ASATable: Component<ASATableProps> = (props) => {
       ),
     },
     {
-      accessorKey: "decimalAmount",
+      accessorKey: "decimalAmountAsString",
       header: "Amount",
       cell: (c: CellContext<BonfireAssetData, unknown>) => {
         // eslint-disable-next-line solid/reactivity
-        const initialValue = c.getValue() as number
+        const initialValue = c.getValue() as string
         // We need to keep and update the state of the cell normally
-        const [value, setValue] = createSignal<number>(initialValue)
+        const [value, setValue] = createSignal<string>(initialValue)
         // createComputed(() => console.debug("value: ", value()))
 
         // When the input is blurred, we'll call our table meta's updateData function
         // if the input value is different from the original decimalAmount value
         const onBlur = () => {
-          if (value() == c.row.original.decimalAmount) {
+          if (
+            convertToBigInt(value(), c.row.original.decimals) ==
+            convertToBigInt(c.row.original.decimalAmountAsString, c.row.original.decimals)
+          ) {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Not updating data: ", value())
             return
-          } else if (0 < value() && value() < c.row.original.decimalAmount) {
+          } else if (
+            0n < convertToBigInt(value(), c.row.original.decimals) &&
+            convertToBigInt(value(), c.row.original.decimals) <
+              convertToBigInt(c.row.original.decimalAmountAsString, c.row.original.decimals)
+          ) {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
@@ -124,8 +114,12 @@ export const ASATable: Component<ASATableProps> = (props) => {
           } else {
             // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
             // console.debug("Updating data 2: ", c.row.original.decimalAmount)
-            c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
-            setValue(c.row.original.decimalAmount)
+            c.table.options.meta?.updateData(
+              c.row.index,
+              c.column.id,
+              c.row.original.decimalAmountAsString,
+            )
+            setValue(c.row.original.decimalAmountAsString)
           }
         }
 
@@ -136,7 +130,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
           },
         ) => {
           // console.debug("e.target.value: ", e.target.value)
-          setValue(Number(e.target.value))
+          setValue(e.target.value)
         }
 
         // If the initialValue is changed externally, sync it up with our state
@@ -145,7 +139,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
           setValue(initialValue)
         })
 
-        const disabled = c.row.original.frozen === true
+        const disabled = c.row.original.isFrozen === true
 
         return (
           <input
@@ -154,7 +148,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
             onBlur={onBlur}
             class="input input-xs w-28 text-right text-xs"
             type="number"
-            max={c.row.original.decimalAmount}
+            max={c.row.original.decimalAmountAsString}
             min={0}
             name="Asset amount"
             aria-label="Asset amount"
@@ -197,12 +191,12 @@ export const ASATable: Component<ASATableProps> = (props) => {
       cell: (info: { getValue: () => string }) => info.getValue(),
     },
     {
-      accessorKey: "id",
+      accessorKey: "assetId",
       header: "ID",
       cell: (info: { getValue: () => number }) => {
         return (
           <a
-            href={getAsaUrl(info.getValue(), props.activeNetwork)}
+            href={getAsaUrl(BigInt(info.getValue()), props.activeNetwork)}
             target="_blank"
             aria-label="View asset on Allo"
           >
@@ -271,40 +265,41 @@ export const ASATable: Component<ASATableProps> = (props) => {
               <tr class="bg-base-200">
                 <For each={headerGroup.headers}>
                   {(header) => (
-                    <th onClick={header.column.getToggleSortingHandler()}>
-                      <div class="hover flex items-center justify-center">
-                        {flexRender(header.column.columnDef.header, header.getContext())}{" "}
-                        {{
-                          asc: (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="h-4 w-4"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10 18a.75.75 0 01-.75-.75V4.66L7.3 6.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 01-1.1 1.02l-1.95-2.1v12.59A.75.75 0 0110 18z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          ),
-                          desc: (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="h-4 w-4"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10 2a.75.75 0 01.75.75v12.59l1.95-2.1a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02l1.95 2.1V2.75A.75.75 0 0110 2z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          ),
-                        }[header.column.getIsSorted() as string] ?? null}
-                      </div>
+                    <th
+                      class="hover flex items-center justify-center"
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="h-4 w-4"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 18a.75.75 0 01-.75-.75V4.66L7.3 6.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 01-1.1 1.02l-1.95-2.1v12.59A.75.75 0 0110 18z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        ),
+                        desc: (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="h-4 w-4"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 2a.75.75 0 01.75.75v12.59l1.95-2.1a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02l1.95 2.1V2.75A.75.75 0 0110 2z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        ),
+                      }[header.column.getIsSorted() as string] ?? null}
                     </th>
                   )}
                 </For>

@@ -1,5 +1,7 @@
+import { version } from "../../package.json"
+
 export function checkAndUpdateVersion() {
-  const currentVersion = "1.1.2"
+  const currentVersion = version
   const storedVersion = localStorage.getItem("version")
 
   if (storedVersion !== currentVersion) {

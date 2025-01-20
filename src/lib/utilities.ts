@@ -1,9 +1,50 @@
-import { AccountInfo, BonfireAssetData } from "./types"
-import { decodeAddress } from "algosdk"
+import { BonfireAssetData } from "./types"
+import { decodeAddress, modelsv2 } from "algosdk"
 import axios from "axios"
 import { CID } from "multiformats/cid"
 import * as digest from "multiformats/hashes/digest"
 import * as mfsha2 from "multiformats/hashes/sha2"
+
+/**
+ * Converts a quantity into a BigInt by adjusting for decimals.
+ *
+ * @param {string|number} quantity - The quantity value as a string or number.
+ * @param {number} decimals - The number of decimal places to account for.
+ * @returns {bigint} - The quantity converted into a BigInt.
+ *
+ * @throws {Error} - If the input is invalid or the conversion fails.
+ */
+export function convertToBigInt(
+  quantity: string | number | null | undefined,
+  decimals: number | null | undefined,
+): bigint {
+  if (typeof quantity !== "string" && typeof quantity !== "number") {
+    throw new Error("Quantity must be a string or a number")
+  }
+  if (typeof decimals !== "number" || decimals < 0 || !Number.isInteger(decimals)) {
+    throw new Error("Decimals must be a non-negative integer")
+  }
+
+  // Convert quantity to a string to handle both numbers and strings
+  const quantityStr = quantity.toString()
+
+  // Split the input into whole and fractional parts
+  const [whole, fraction = ""] = quantityStr.split(".")
+
+  // Ensure the fractional part doesn't exceed the allowed decimals
+  if (fraction.length > decimals) {
+    throw new Error(`Too many decimal places`)
+  }
+
+  // Pad the fractional part with zeros to match the decimal places
+  const fractionPadded = fraction.padEnd(decimals, "0")
+
+  // Concatenate the whole and padded fractional parts
+  const adjustedValue = whole + fractionPadded
+
+  // Convert to BigInt
+  return BigInt(adjustedValue)
+}
 
 export function ellipseString(string: string | null): string {
   return string ? `${string.slice(0, 3)}...${string.slice(-3)}` : ""
@@ -16,15 +57,15 @@ export function numberWithCommas(num: number | string): string {
   return num_parts.join(".")
 }
 
-export function formatNumWithDecimals(num: number, decimals: number): string {
-  const shifted_num = (num /= Math.pow(10, decimals))
+export function formatBigIntWithDecimals(num: bigint, decimals: number): string {
+  const shifted_num = (num /= BigInt(Math.pow(10, decimals)))
   const shifted_num_string = shifted_num.toString()
   return shifted_num_string
 }
 
 export function displayAssetAmount(asset: BonfireAssetData) {
   try {
-    return formatNumWithDecimals(asset.amount, asset.decimals)
+    return formatBigIntWithDecimals(asset.amount, asset.decimals)
   } catch (e) {
     return "0"
   }
@@ -46,8 +87,8 @@ export function numberToDecimal(num: number, decimals: number): number {
   return shifted_num_string
 }
 
-export function calcExtraLogs(acctInfo: AccountInfo): number {
-  const extraLogs = Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
+export function calcExtraLogs(acctInfo: modelsv2.Account): number {
+  const extraLogs = Math.floor(Number((acctInfo.amount - acctInfo.minBalance) / 100000n))
   return extraLogs
 }
 

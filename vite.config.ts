@@ -16,5 +16,5 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
   },
-  esbuild: { drop: ["console"] },
+  // esbuild: { drop: ["console"] },
 })

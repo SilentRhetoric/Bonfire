@@ -1,15 +1,23 @@
 import { useWallet } from "@txnlab/use-wallet-solid"
 import { For, Show, createComputed, createMemo, createSignal, on } from "solid-js"
-import { AccountInfo, BonfireAssetData } from "../lib/types"
+import { BonfireAssetData } from "../lib/types"
 import {
   AtomicTransactionComposer,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   makePaymentTxnWithSuggestedParamsFromObject,
   getApplicationAddress,
+  Address,
 } from "algosdk"
+import { modelsv2 } from "algosdk"
 import { getTransactionWithSigner } from "@algorandfoundation/algokit-utils"
 import { ASATable } from "./ASATable"
-import { calcExtraLogs, ellipseString, makeIntegerAmount, numberToDecimal } from "../lib/utilities"
+import {
+  calcExtraLogs,
+  convertToBigInt,
+  ellipseString,
+  formatBigIntWithDecimals,
+  numberToDecimal,
+} from "../lib/utilities"
 import { AlgoAmount } from "@algorandfoundation/algokit-utils/types/amount"
 import About from "./About"
 import { AlloIcon } from "./Icons"
@@ -30,9 +38,9 @@ export default function Main(props: MainProps) {
   const { activeAddress, activeNetwork, transactionSigner, wallets, algodClient } = useWallet()
 
   // const activeAddress = () => "O2ZPSV6NJC32ZXQ7PZ5ID6PXRKAWQE2XWFZK5NK3UFULPZT6OKIOROEAPU" // Many-ASA acct for stress testing
-  const [algoBalance, setAlgoBalance] = createSignal(0)
+  const [algoBalance, setAlgoBalance] = createSignal(0n)
   const [accountAssets, setAccountAssets] = createStore<BonfireAssetData[]>([])
-  const [bonfireInfo, setBonfireInfo] = createSignal({} as AccountInfo)
+  const [bonfireInfo, setBonfireInfo] = createSignal({} as modelsv2.Account)
   const [rowSelection, setRowSelection] = createSignal<RowSelectionState>({})
   const [confirmedTxn, setConfirmedTxn] = createSignal("")
   const [loadingAccountInfo, setLoadingAccountInfo] = createSignal(false)
@@ -46,18 +54,9 @@ export default function Main(props: MainProps) {
   const bonfireAppId = createMemo(() => BONFIRE_APP_IDS[activeNetwork()])
   const bonfireAddr = createMemo(() => getApplicationAddress(BONFIRE_APP_IDS[activeNetwork()]))
   const transactionSignerAccount = createMemo<TransactionSignerAccount>(() => ({
-    addr: activeAddress()!,
+    addr: Address.fromString(activeAddress()!),
     signer: transactionSigner,
   }))
-
-  // TODO: Use useWallet algodClient
-  // const algodClient = createMemo(() => {
-  // const config = networkConfigs[activeNetwork()]
-  // const token = config.algodToken ? config.algodToken : ""
-  // const server = config.algodServer ? config.algodServer : ""
-  // const port = config.algodPort ? config.algodPort : ""
-  // return new Algodv2(token, server, port)
-  // })
 
   const appDetails = createMemo<AppDetails>(() => {
     return {
@@ -80,23 +79,25 @@ export default function Main(props: MainProps) {
     if (addr) {
       // console.debug("walletClient: ", client)
       try {
-        const info = (await algodClient().accountInformation(addr).do()) as AccountInfo
+        const info = await algodClient().accountInformation(addr).do()
         // console.debug("info: ", info)
         // setAccountInfo(info)
         setAlgoBalance(info.amount)
+        if (info.assets === undefined) {
+          throw new Error("No assets returned from account info")
+        }
         const assetsFromRes = info.assets
         setNumAssets(assetsFromRes.length)
         // console.debug("Assets from response", assetsFromRes)
         // Reshape the asset data from the account info slightly
         const assets: BonfireAssetData[] = [
-          ...assetsFromRes.map(({ "asset-id": id, amount, "is-frozen": frozen }) => ({
-            id: Number(id),
-            // idString: id.toString(),
+          ...assetsFromRes.map(({ assetId, amount, isFrozen }) => ({
+            assetId,
             amount,
-            frozen,
+            isFrozen,
             decimals: 0,
-            total: 0,
-            decimalAmount: 0,
+            total: 0n,
+            decimalAmountAsString: "0",
             creator: "",
           })),
         ]
@@ -106,24 +107,27 @@ export default function Main(props: MainProps) {
         await Promise.all(
           // eslint-disable-next-line solid/reactivity
           assets.map(async (asset) => {
-            if (asset.id > 0) {
+            if (asset.assetId > 0) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const remainingRequests = await limiter.removeTokens(1)
                 // console.debug("Asset before: ", JSON.stringify(asset))
-                const { params } = await algodClient().getAssetByID(asset.id).do()
+                const { params } = await algodClient().getAssetByID(asset.assetId).do()
                 // console.debug("params: ", params)
                 asset.name = params.name
-                asset.unitName = params["unit-name"]
+                asset.unitName = params.unitName
                 asset.decimals = params.decimals
                 asset.total = params.total
-                asset.decimalAmount = numberToDecimal(asset.amount, params.decimals)
+                asset.decimalAmountAsString = formatBigIntWithDecimals(
+                  asset.amount,
+                  params.decimals,
+                )
                 asset.creator = params.creator
                 asset.reserve = params.reserve
                 asset.url = params.url
                 // console.debug("Asset after: ", JSON.stringify(asset))
               } catch (e) {
-                console.error(`Error fetching asset ${asset.id} info: `, e)
+                console.error(`Error fetching asset ${asset.assetId} info: `, e)
                 asset.name = "[Deleted Asset]"
                 asset.unitName = "N/A"
               }
@@ -136,7 +140,7 @@ export default function Main(props: MainProps) {
         setAccountAssets(assets)
         setLoadingAccountInfo(false)
       } catch (e) {
-        setAlgoBalance(0)
+        setAlgoBalance(0n)
         setAccountAssets([])
         console.error("Error fetching account info: ", e)
         setLoadingAccountInfo(false)
@@ -153,7 +157,7 @@ export default function Main(props: MainProps) {
       const client = algodClient()
       const bonfireInfo = await client.accountInformation(bonfireAddr()).do()
       // console.debug("bonfireInfo: ", bonfireInfo)
-      setBonfireInfo(bonfireInfo as AccountInfo)
+      setBonfireInfo(bonfireInfo)
     } catch (e) {
       console.error("Error fetching Bonfire info: ", e)
     }
@@ -168,7 +172,7 @@ export default function Main(props: MainProps) {
         if (activeAddress() === null) {
           await getBonfireInfo()
           setRowSelection({})
-          setAlgoBalance(0)
+          setAlgoBalance(0n)
           setAccountAssets([])
           return
         } else {
@@ -201,14 +205,17 @@ export default function Main(props: MainProps) {
 
         if (
           assetToBurn.amount > 0 && // This also handles deleted assets :)
-          bonfireInfo()?.assets.find((a) => a["asset-id"] === assetToBurn.id) === undefined
+          bonfireInfo()?.assets?.find((a) => a.assetId === assetToBurn.assetId) === undefined
         ) {
           fees = fees + 2000
           numTxns = numTxns + 1
           numOptIns = numOptIns + 1
         }
 
-        if (makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn) === assetToBurn.amount) {
+        if (
+          convertToBigInt(assetToBurn.decimalAmountAsString, assetToBurn.decimals) ===
+          assetToBurn.amount
+        ) {
           if (assetToBurn.creator !== activeAddress()) {
             mbrReduction = mbrReduction + 100000
           }
@@ -281,15 +288,15 @@ export default function Main(props: MainProps) {
           const assetToBurn = assetsToBurn[i]
           if (
             assetToBurn.amount > 0 && // This also handles deleted assets :)
-            bonfireInfo()?.assets.find((a) => a["asset-id"] === assetToBurn.id) === undefined
+            bonfireInfo()?.assets?.find((a) => a.assetId === assetToBurn.assetId) === undefined
           ) {
-            optInAssets.push(assetToBurn.id)
+            optInAssets.push(assetToBurn.assetId)
             numOptInCalls = numOptInCalls + 1
             slots = slots + 1
           }
 
           const closeRemainder = async (asset: BonfireAssetData) => {
-            if (makeIntegerAmount(asset.decimalAmount, asset) === asset.amount) {
+            if (convertToBigInt(asset.decimalAmountAsString, asset.decimals) === asset.amount) {
               if (asset.creator == activeAddress()) {
                 return undefined
               } else return bonfireAddr()
@@ -302,8 +309,8 @@ export default function Main(props: MainProps) {
           const axferObj: any = {
             from: activeAddress()!,
             to: bonfireAddr(),
-            assetIndex: assetToBurn.id,
-            amount: makeIntegerAmount(assetToBurn.decimalAmount, assetToBurn),
+            assetIndex: assetToBurn.assetId,
+            amount: convertToBigInt(assetToBurn.decimalAmountAsString, assetToBurn.decimals),
             suggestedParams,
           }
           if (closeRemainderAddr) {
@@ -322,8 +329,8 @@ export default function Main(props: MainProps) {
 
         if (numMBRPayments > 0) {
           const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
-            from: activeAddress()!,
-            to: bonfireAddr(),
+            sender: activeAddress()!,
+            receiver: bonfireAddr(),
             amount: 100000 * numMBRPayments,
             suggestedParams,
           })
@@ -335,7 +342,7 @@ export default function Main(props: MainProps) {
         optInAssets.forEach((id) =>
           group.arc54OptIntoAsa(
             { asa: id },
-            { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2 }) } },
+            { sendParams: { fee: new AlgoAmount({ microAlgos: suggestedParams.minFee * 2n }) } },
           ),
         )
 
@@ -364,11 +371,12 @@ export default function Main(props: MainProps) {
       const suggestedParams = await algodClient().getTransactionParams().do()
 
       const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
-        from: activeAddress()!,
-        to: bonfireAddr(),
+        sender: activeAddress()!,
+        receiver: bonfireAddr(),
         amount: 100000 * numLogs(),
         suggestedParams,
       })
+
       const txn = await getTransactionWithSigner(payTxn, transactionSignerAccount())
 
       const atc = new AtomicTransactionComposer()

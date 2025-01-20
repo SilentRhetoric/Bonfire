@@ -1,25 +1,12 @@
-export type AssetBalance = {
-  amount: number
-  "asset-id": number
-  "is-frozen": boolean
-}
-
-export type AccountInfo = {
-  address: string
-  amount: number
-  assets: AssetBalance[]
-  "min-balance": number
-}
-
 export interface BonfireAssetData {
-  id: number
-  amount: number
-  frozen: boolean
+  assetId: bigint
+  amount: bigint
+  isFrozen: boolean
   decimals: number
   name?: string
   unitName?: string
-  total: number
-  decimalAmount: number
+  total: bigint
+  decimalAmountAsString: string
   creator: string
   reserve?: string
   url?: string
@@ -33,8 +20,4 @@ export type NetworkConfig = {
   blockExplorer?: string // The block explorer to link out to, either algoexplorer or dappflow
 }
 
-export type NetworkName = "mainnet" | "testnet" | "betanet" | "localnet"
-
-export type NetworkConfigs = {
-  [K in NetworkName]: NetworkConfig
-}
+export type NetworkName = "mainnet" | "testnet" | "betanet" | "fnet" | "localnet"
