@@ -83,7 +83,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
       ),
     },
     {
-      accessorKey: "decimalAmountAsString",
+      accessorKey: "decimalAmount",
       header: "Amount",
       cell: (c: CellContext<BonfireAssetData, unknown>) => {
         // eslint-disable-next-line solid/reactivity
@@ -97,29 +97,25 @@ export const ASATable: Component<ASATableProps> = (props) => {
         const onBlur = () => {
           if (
             convertToBigInt(value(), c.row.original.decimals) ==
-            convertToBigInt(c.row.original.decimalAmountAsString, c.row.original.decimals)
+            convertToBigInt(c.row.original.decimalAmount, c.row.original.decimals)
           ) {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Not updating data: ", value())
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Not updating data: ", value())
             return
           } else if (
             0n < convertToBigInt(value(), c.row.original.decimals) &&
             convertToBigInt(value(), c.row.original.decimals) <
-              convertToBigInt(c.row.original.decimalAmountAsString, c.row.original.decimals)
+              convertToBigInt(c.row.original.decimalAmount, c.row.original.decimals)
           ) {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Updating data 1: ", value())
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
-            // console.debug("row: ", c.row)
+            console.debug("row: ", c.row)
           } else {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Updating data 2: ", c.row.original.decimalAmount)
-            c.table.options.meta?.updateData(
-              c.row.index,
-              c.column.id,
-              c.row.original.decimalAmountAsString,
-            )
-            setValue(c.row.original.decimalAmountAsString)
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Updating data 2: ", c.row.original.decimalAmount)
+            c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
+            setValue(c.row.original.decimalAmount)
           }
         }
 
@@ -129,13 +125,13 @@ export const ASATable: Component<ASATableProps> = (props) => {
             target: HTMLInputElement
           },
         ) => {
-          // console.debug("e.target.value: ", e.target.value)
+          console.debug("e.target.value: ", e.target.value)
           setValue(e.target.value)
         }
 
         // If the initialValue is changed externally, sync it up with our state
         createEffect(() => {
-          // console.debug("initialValue: ", initialValue)
+          console.debug("initialValue: ", initialValue)
           setValue(initialValue)
         })
 
@@ -147,8 +143,8 @@ export const ASATable: Component<ASATableProps> = (props) => {
             onChange={onChange}
             onBlur={onBlur}
             class="input input-xs w-28 text-right text-xs"
-            type="number"
-            max={c.row.original.decimalAmountAsString}
+            type="string"
+            max={c.row.original.decimalAmount}
             min={0}
             name="Asset amount"
             aria-label="Asset amount"
@@ -193,14 +189,14 @@ export const ASATable: Component<ASATableProps> = (props) => {
     {
       accessorKey: "assetId",
       header: "ID",
-      cell: (info: { getValue: () => number }) => {
+      cell: (info: { getValue: () => bigint }) => {
         return (
           <a
             href={getAsaUrl(BigInt(info.getValue()), props.activeNetwork)}
             target="_blank"
             aria-label="View asset on Allo"
           >
-            {info.getValue()}
+            {Number(info.getValue())}
           </a>
         )
       },
@@ -231,14 +227,14 @@ export const ASATable: Component<ASATableProps> = (props) => {
           columnId: string | keyof BonfireAssetData,
           value: unknown,
         ) => {
-          // console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
+          console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
           props.setAccountAssets(
             // This method replaces the whole array which makes it reactive
             (prev: BonfireAssetData[]) => {
-              // console.debug("prev: ", prev)
+              console.debug("prev: ", prev)
               let modifiedArray: BonfireAssetData[] = []
               modifiedArray = prev.map((row, index) => {
-                // console.debug("row: ", row)
+                console.debug("row: ", row)
                 if (index === rowIndex) {
                   return {
                     ...prev[rowIndex]!,
@@ -247,7 +243,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                 }
                 return row
               })
-              // console.debug("modifiedArray: ", modifiedArray)
+              console.debug("modifiedArray: ", modifiedArray)
               return modifiedArray
             },
           )
@@ -265,41 +261,40 @@ export const ASATable: Component<ASATableProps> = (props) => {
               <tr class="bg-base-200">
                 <For each={headerGroup.headers}>
                   {(header) => (
-                    <th
-                      class="hover flex items-center justify-center"
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {{
-                        asc: (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="h-4 w-4"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M10 18a.75.75 0 01-.75-.75V4.66L7.3 6.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 01-1.1 1.02l-1.95-2.1v12.59A.75.75 0 0110 18z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                        ),
-                        desc: (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="h-4 w-4"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M10 2a.75.75 0 01.75.75v12.59l1.95-2.1a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02l1.95 2.1V2.75A.75.75 0 0110 2z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                        ),
-                      }[header.column.getIsSorted() as string] ?? null}
+                    <th onClick={header.column.getToggleSortingHandler()}>
+                      <div class="hover flex items-center justify-center">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{
+                          asc: (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="h-4 w-4"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10 18a.75.75 0 01-.75-.75V4.66L7.3 6.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 01-1.1 1.02l-1.95-2.1v12.59A.75.75 0 0110 18z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          ),
+                          desc: (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="h-4 w-4"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10 2a.75.75 0 01.75.75v12.59l1.95-2.1a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02l1.95 2.1V2.75A.75.75 0 0110 2z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          ),
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </div>
                     </th>
                   )}
                 </For>

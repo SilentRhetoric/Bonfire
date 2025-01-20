@@ -1,3 +1,16 @@
+export type AssetBalance = {
+  amount: bigint
+  assetId: bigint
+  isFrozen: boolean
+}
+
+export type AccountInfo = {
+  address: string
+  amount: bigint
+  assets: AssetBalance[]
+  minBalance: bigint
+}
+
 export interface BonfireAssetData {
   assetId: bigint
   amount: bigint
@@ -6,7 +19,7 @@ export interface BonfireAssetData {
   name?: string
   unitName?: string
   total: bigint
-  decimalAmountAsString: string
+  decimalAmount: string
   creator: string
   reserve?: string
   url?: string

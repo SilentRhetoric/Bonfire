@@ -1,4 +1,4 @@
-import { BonfireAssetData } from "./types"
+import { AccountInfo, BonfireAssetData } from "./types"
 import { decodeAddress, modelsv2 } from "algosdk"
 import axios from "axios"
 import { CID } from "multiformats/cid"
@@ -87,8 +87,9 @@ export function numberToDecimal(num: number, decimals: number): number {
   return shifted_num_string
 }
 
-export function calcExtraLogs(acctInfo: modelsv2.Account): number {
-  const extraLogs = Math.floor(Number((acctInfo.amount - acctInfo.minBalance) / 100000n))
+export function calcExtraLogs(acctInfo: AccountInfo): number {
+  const freeBalance = Number(acctInfo.amount - acctInfo.minBalance)
+  const extraLogs = Math.floor(freeBalance / 100000)
   return extraLogs
 }
 
@@ -103,12 +104,12 @@ export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
       const url = data.image ? data.image : `${IPFS_ENDPOINT}/${cid}${optimizer}`
       if (url.startsWith("ipfs://")) {
         const srcUrl = `${IPFS_ENDPOINT}/${url.slice(7)}${optimizer}`
-        // console.debug("srcUrl1: ", srcUrl)
+        console.debug("srcUrl1: ", srcUrl)
         return srcUrl
       }
       if (url !== "") {
         const srcUrl = url
-        // console.debug("srcUrl2: ", srcUrl)
+        console.debug("srcUrl2: ", srcUrl)
         return srcUrl
       }
       return ""
@@ -119,36 +120,36 @@ export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
         const response = await axios.get(`${IPFS_ENDPOINT}/${url.slice(7)}`)
         if (response.data.image.startsWith("ipfs://")) {
           const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
-          // console.debug("srcUrl3: ", srcUrl)
+          console.debug("srcUrl3: ", srcUrl)
           return srcUrl
         }
         const srcUrl = response.data.image
-        // console.debug("srcUrl4: ", srcUrl)
+        console.debug("srcUrl4: ", srcUrl)
         return srcUrl
       } else {
         const response = await axios.get(url)
         if (response.data.image.startsWith("ipfs://")) {
           const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
-          // console.debug("srcUrl5: ", srcUrl)
+          console.debug("srcUrl5: ", srcUrl)
           return srcUrl
         }
         const srcUrl = response.data.image
-        // console.debug("srcUrl6: ", srcUrl)
+        console.debug("srcUrl6: ", srcUrl)
         return srcUrl
       }
     }
     if (asset.url.startsWith("https://") && asset.url.includes("ipfs")) {
       const srcUrl = `${IPFS_ENDPOINT}/${asset.url.split("/ipfs/")[1]}${optimizer}`
-      // console.debug("srcUrl7: ", srcUrl)
+      console.debug("srcUrl7: ", srcUrl)
       return srcUrl
     }
     if (asset.url.startsWith("ipfs://")) {
       const srcUrl = `${IPFS_ENDPOINT}/${asset.url.slice(7)}${optimizer}`
-      // console.debug("srcUrl8: ", srcUrl)
+      console.debug("srcUrl8: ", srcUrl)
       return srcUrl
     }
     const srcUrl = asset.url
-    // console.debug("srcUrl9: ", srcUrl)
+    console.debug("srcUrl9: ", srcUrl)
     return srcUrl
   } catch (error) {
     console.error("Error fetching IPFS data: ", error)
