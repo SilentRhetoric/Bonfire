@@ -279,7 +279,14 @@ export default function Main(props: MainProps) {
   async function burn() {
     setWaitingBurn(true)
     // setConfirmedTxn("") // May not need to do this
-
+    if (
+      !confirm(
+        "Assets burned in the Bonfire cannot be recovered (unless clawback is enabled). Carefully review all transactions in your wallet before signing them.\n\nAre you sure you want to burn the selected assets?",
+      )
+    ) {
+      setWaitingBurn(false)
+      return
+    }
     try {
       const bonfireClient = new Arc54Client(appDetails(), algodClient())
       const suggestedParams = await algodClient().getTransactionParams().do()
