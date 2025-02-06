@@ -263,7 +263,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>
-                      <span class="hover flex items-center justify-center">
+                      <span class="hover flex items-center justify-start">
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
                           asc: (
