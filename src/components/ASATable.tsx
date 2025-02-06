@@ -11,9 +11,8 @@ import {
 import { Component, For, createEffect, createMemo, createSignal } from "solid-js"
 import { BonfireAssetData } from "../lib/types"
 import { getAsaUrl } from "../lib/networks"
-import { NetworkId } from "@txnlab/use-wallet-solid"
 import { SetStoreFunction } from "solid-js/store"
-// import { ASAImage } from "./ASAImage"
+import { convertToBigInt } from "../lib/utilities"
 
 declare module "@tanstack/solid-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,7 +54,7 @@ type ASATableProps = {
   setAccountAssets: SetStoreFunction<BonfireAssetData[]>
   rowSelection: RowSelectionState
   setRowSelection: (data: object) => void
-  activeNetwork: NetworkId
+  activeNetwork: string
 }
 
 export const ASATable: Component<ASATableProps> = (props) => {
@@ -64,22 +63,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
   const columns = [
     {
       id: "select",
-      // Disabling this "Select all" shortcut to avoid unintentional selection of assets
-      // header: (data: {
-      //   table: {
-      //     getIsAllRowsSelected: () => boolean
-      //     getIsSomeRowsSelected: () => boolean
-      //     getToggleAllRowsSelectedHandler: () => unknown
-      //   }
-      // }) => (
-      //   <IndeterminateCheckbox
-      //     {...{
-      //       checked: data.table.getIsAllRowsSelected(),
-      //       indeterminate: data.table.getIsSomeRowsSelected(),
-      //       onChange: data.table.getToggleAllRowsSelectedHandler(),
-      //     }}
-      //   />
-      // ),
+      header: "🔥",
       cell: (data: {
         row: {
           original: BonfireAssetData
@@ -92,7 +76,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
         <IndeterminateCheckbox
           {...{
             checked: data.row.getIsSelected(),
-            disabled: !data.row.getCanSelect() || data.row.original.frozen === true,
+            disabled: !data.row.getCanSelect() || data.row.original.isFrozen === true,
             indeterminate: data.row.getIsSomeSelected(),
             onChange: data.row.getToggleSelectedHandler(),
           }}
@@ -104,26 +88,33 @@ export const ASATable: Component<ASATableProps> = (props) => {
       header: "Amount",
       cell: (c: CellContext<BonfireAssetData, unknown>) => {
         // eslint-disable-next-line solid/reactivity
-        const initialValue = c.getValue() as number
+        const initialValue = c.getValue() as string
         // We need to keep and update the state of the cell normally
-        const [value, setValue] = createSignal<number>(initialValue)
+        const [value, setValue] = createSignal<string>(initialValue)
         // createComputed(() => console.debug("value: ", value()))
 
         // When the input is blurred, we'll call our table meta's updateData function
         // if the input value is different from the original decimalAmount value
         const onBlur = () => {
-          if (value() == c.row.original.decimalAmount) {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Not updating data: ", value())
+          if (
+            convertToBigInt(value(), c.row.original.decimals) ==
+            convertToBigInt(c.row.original.decimalAmount, c.row.original.decimals)
+          ) {
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Not updating data: ", value())
             return
-          } else if (0 < value() && value() < c.row.original.decimalAmount) {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Updating data 1: ", value())
+          } else if (
+            0n < convertToBigInt(value(), c.row.original.decimals) &&
+            convertToBigInt(value(), c.row.original.decimals) <
+              convertToBigInt(c.row.original.decimalAmount, c.row.original.decimals)
+          ) {
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Updating data 1: ", value())
             c.table.options.meta?.updateData(c.row.index, c.column.id, value())
-            // console.debug("row: ", c.row)
+            console.debug("row: ", c.row)
           } else {
-            // console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
-            // console.debug("Updating data 2: ", c.row.original.decimalAmount)
+            console.debug("original.decimalAmount: ", c.row.original.decimalAmount)
+            console.debug("Updating data 2: ", c.row.original.decimalAmount)
             c.table.options.meta?.updateData(c.row.index, c.column.id, c.row.original.decimalAmount)
             setValue(c.row.original.decimalAmount)
           }
@@ -135,17 +126,17 @@ export const ASATable: Component<ASATableProps> = (props) => {
             target: HTMLInputElement
           },
         ) => {
-          // console.debug("e.target.value: ", e.target.value)
-          setValue(Number(e.target.value))
+          console.debug("e.target.value: ", e.target.value)
+          setValue(e.target.value)
         }
 
         // If the initialValue is changed externally, sync it up with our state
         createEffect(() => {
-          // console.debug("initialValue: ", initialValue)
+          console.debug("Setting initialValue: ", initialValue)
           setValue(initialValue)
         })
 
-        const disabled = c.row.original.frozen === true
+        const disabled = c.row.original.isFrozen === true
 
         return (
           <input
@@ -153,7 +144,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
             onChange={onChange}
             onBlur={onBlur}
             class="input input-xs w-28 text-right text-xs"
-            type="number"
+            type="string"
             max={c.row.original.decimalAmount}
             min={0}
             name="Asset amount"
@@ -197,16 +188,16 @@ export const ASATable: Component<ASATableProps> = (props) => {
       cell: (info: { getValue: () => string }) => info.getValue(),
     },
     {
-      accessorKey: "id",
+      accessorKey: "assetId",
       header: "ID",
-      cell: (info: { getValue: () => number }) => {
+      cell: (info: { getValue: () => bigint }) => {
         return (
           <a
-            href={getAsaUrl(info.getValue(), props.activeNetwork)}
+            href={getAsaUrl(BigInt(info.getValue()), props.activeNetwork)}
             target="_blank"
             aria-label="View asset on Allo"
           >
-            {info.getValue()}
+            {Number(info.getValue())}
           </a>
         )
       },
@@ -237,14 +228,14 @@ export const ASATable: Component<ASATableProps> = (props) => {
           columnId: string | keyof BonfireAssetData,
           value: unknown,
         ) => {
-          // console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
+          console.debug(`Updating row ${rowIndex} column ${columnId} value ${value}`)
           props.setAccountAssets(
             // This method replaces the whole array which makes it reactive
             (prev: BonfireAssetData[]) => {
-              // console.debug("prev: ", prev)
+              console.debug("prev: ", prev)
               let modifiedArray: BonfireAssetData[] = []
               modifiedArray = prev.map((row, index) => {
-                // console.debug("row: ", row)
+                console.debug("row: ", row)
                 if (index === rowIndex) {
                   return {
                     ...prev[rowIndex]!,
@@ -253,7 +244,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                 }
                 return row
               })
-              // console.debug("modifiedArray: ", modifiedArray)
+              console.debug("modifiedArray: ", modifiedArray)
               return modifiedArray
             },
           )
@@ -272,8 +263,8 @@ export const ASATable: Component<ASATableProps> = (props) => {
                 <For each={headerGroup.headers}>
                   {(header) => (
                     <th onClick={header.column.getToggleSortingHandler()}>
-                      <div class="hover flex items-center justify-center">
-                        {flexRender(header.column.columnDef.header, header.getContext())}{" "}
+                      <span class="hover flex items-center justify-start">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
                           asc: (
                             <svg
@@ -304,7 +295,7 @@ export const ASATable: Component<ASATableProps> = (props) => {
                             </svg>
                           ),
                         }[header.column.getIsSorted() as string] ?? null}
-                      </div>
+                      </span>
                     </th>
                   )}
                 </For>

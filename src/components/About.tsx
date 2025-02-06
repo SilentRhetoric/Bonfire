@@ -79,9 +79,9 @@ export default function About() {
         the smart contract can also be called by other smart contracts, if desired.
       </p>
       <p>The smart contract is deployed with the following IDs on each public network:</p>
-      <li>MainNet: {BONFIRE_APP_IDS.mainnet}</li>
-      <li>TestNet: {BONFIRE_APP_IDS.testnet}</li>
-      <li>BetaNet: {BONFIRE_APP_IDS.betanet}</li>
+      <li>MainNet: {BONFIRE_APP_IDS.mainnet.toString()}</li>
+      <li>TestNet: {BONFIRE_APP_IDS.testnet.toString()}</li>
+      <li>BetaNet: {BONFIRE_APP_IDS.betanet.toString()}</li>
       <h3>Pay it forward</h3>
       <p>
         It costs 0.1A for the smart contract to opt into each ASA. The interface displays how many

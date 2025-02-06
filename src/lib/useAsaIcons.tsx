@@ -17,9 +17,9 @@ function useAsaIcons() {
   const [asaList] = createResource<IAsaList>(getAsaList)
 
   async function getAsaList() {
-    // console.debug("Fetching ASA List")
+    console.debug("Fetching ASA List")
     const list: IAsaList = await (await fetch("https://asa-list.tinyman.org/assets.json")).json()
-    // console.debug("ASA List: ", list)
+    console.debug("ASA List: ", list)
     return list
   }
 

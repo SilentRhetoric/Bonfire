@@ -20,7 +20,7 @@ const walletManager = new WalletManager({
     },
     // WalletId.KMD,
   ],
-  network: NetworkId.MAINNET,
+  defaultNetwork: NetworkId.MAINNET,
 })
 
 const App: Component = () => {

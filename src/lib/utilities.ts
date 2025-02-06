@@ -5,39 +5,90 @@ import { CID } from "multiformats/cid"
 import * as digest from "multiformats/hashes/digest"
 import * as mfsha2 from "multiformats/hashes/sha2"
 
+/**
+ * Converts a quantity into a BigInt by adjusting for decimals.
+ *
+ * @param {string|number} quantity - The quantity value as a string or number.
+ * @param {number} decimals - The number of decimal places to account for.
+ * @returns {bigint} - The quantity converted into a BigInt.
+ *
+ * @throws {Error} - If the input is invalid or the conversion fails.
+ */
+export function convertToBigInt(
+  quantity: string | number | null | undefined,
+  decimals: number | null | undefined,
+): bigint {
+  if (typeof quantity !== "string" && typeof quantity !== "number") {
+    throw new Error("Quantity must be a string or a number")
+  }
+  if (typeof decimals !== "number" || decimals < 0 || !Number.isInteger(decimals)) {
+    throw new Error("Decimals must be a non-negative integer")
+  }
+
+  // Convert quantity to a string to handle both numbers and strings
+  const quantityStr = quantity.toString()
+
+  // Split the input into whole and fractional parts
+  const [whole, fraction = ""] = quantityStr.split(".")
+
+  // Ensure the fractional part doesn't exceed the allowed decimals
+  if (fraction.length > decimals) {
+    throw new Error(`Too many decimal places`)
+  }
+
+  // Pad the fractional part with zeros to match the decimal places
+  const fractionPadded = fraction.padEnd(decimals, "0")
+
+  // Concatenate the whole and padded fractional parts
+  const adjustedValue = whole + fractionPadded
+
+  // Convert to BigInt
+  return BigInt(adjustedValue)
+}
+
 export function ellipseString(string: string | null): string {
   return string ? `${string.slice(0, 3)}...${string.slice(-3)}` : ""
 }
 
-// https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-export function numberWithCommas(num: number | string): string {
-  const num_parts = num.toString().split(".")
-  num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-  return num_parts.join(".")
-}
-
-export function formatNumWithDecimals(num: number, decimals: number): string {
-  const shifted_num = (num /= Math.pow(10, decimals))
-  const shifted_num_string = shifted_num.toString()
-  return shifted_num_string
-}
-
-export function displayAssetAmount(asset: BonfireAssetData) {
-  try {
-    return formatNumWithDecimals(asset.amount, asset.decimals)
-  } catch (e) {
-    return "0"
+/**
+ * Formats a bigint value with a specified number of decimal places.
+ *
+ * @param value - The bigint value to format.
+ * @param decimalPlaces - The number of decimal places to include in the formatted string.
+ * @returns A string representing the formatted bigint value with the specified number of decimal places.
+ * @throws Will throw an error if the decimalPlaces parameter is a negative integer.
+ */
+export function formatBigIntWithDecimals(value: bigint, decimalPlaces: number): string {
+  if (decimalPlaces < 0) {
+    throw new Error("Decimal places must be a non-negative integer.")
   }
-}
 
-export function makeBigIntAmount(decimal_amount: number, asset: BonfireAssetData): bigint {
-  const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
-  return bigIntAmount
-}
+  const strValue = value.toString()
 
-export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetData): number {
-  const intAmount = decimal_amount * Math.pow(10, asset.decimals)
-  return intAmount
+  if (decimalPlaces === 0) {
+    return strValue // No shift needed
+  }
+
+  const length = strValue.length
+
+  let result: string
+  if (decimalPlaces >= length) {
+    // Add leading zeros if the decimal shift exceeds the number length
+    const leadingZeros = "0".repeat(decimalPlaces - length)
+    result = `0.${leadingZeros}${strValue}`
+  } else {
+    // Insert the decimal point at the correct position
+    const integerPart = strValue.slice(0, length - decimalPlaces)
+    const fractionalPart = strValue.slice(length - decimalPlaces)
+    result = `${integerPart}.${fractionalPart}`
+  }
+
+  // Trim trailing zeros in the fractional part
+  if (result.includes(".")) {
+    result = result.replace(/\.?0+$/, "") // Remove trailing zeros and optional decimal point
+  }
+
+  return result
 }
 
 export function numberToDecimal(num: number, decimals: number): number {
@@ -47,9 +98,12 @@ export function numberToDecimal(num: number, decimals: number): number {
 }
 
 export function calcExtraLogs(acctInfo: AccountInfo): number {
-  const extraLogs = Math.floor((acctInfo.amount - acctInfo["min-balance"]) / 100000)
+  const freeBalance = Number(acctInfo.amount - acctInfo.minBalance)
+  const extraLogs = Math.floor(freeBalance / 100000)
   return extraLogs
 }
+
+// For NFTs with associated data
 
 export const IPFS_ENDPOINT = "https://ipfs.algonode.xyz/ipfs"
 
@@ -62,12 +116,12 @@ export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
       const url = data.image ? data.image : `${IPFS_ENDPOINT}/${cid}${optimizer}`
       if (url.startsWith("ipfs://")) {
         const srcUrl = `${IPFS_ENDPOINT}/${url.slice(7)}${optimizer}`
-        // console.debug("srcUrl1: ", srcUrl)
+        console.debug("srcUrl1: ", srcUrl)
         return srcUrl
       }
       if (url !== "") {
         const srcUrl = url
-        // console.debug("srcUrl2: ", srcUrl)
+        console.debug("srcUrl2: ", srcUrl)
         return srcUrl
       }
       return ""
@@ -78,36 +132,36 @@ export async function ipfsFromAsset(asset: BonfireAssetData): Promise<string> {
         const response = await axios.get(`${IPFS_ENDPOINT}/${url.slice(7)}`)
         if (response.data.image.startsWith("ipfs://")) {
           const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
-          // console.debug("srcUrl3: ", srcUrl)
+          console.debug("srcUrl3: ", srcUrl)
           return srcUrl
         }
         const srcUrl = response.data.image
-        // console.debug("srcUrl4: ", srcUrl)
+        console.debug("srcUrl4: ", srcUrl)
         return srcUrl
       } else {
         const response = await axios.get(url)
         if (response.data.image.startsWith("ipfs://")) {
           const srcUrl = `${IPFS_ENDPOINT}/${response.data.image.slice(7)}${optimizer}`
-          // console.debug("srcUrl5: ", srcUrl)
+          console.debug("srcUrl5: ", srcUrl)
           return srcUrl
         }
         const srcUrl = response.data.image
-        // console.debug("srcUrl6: ", srcUrl)
+        console.debug("srcUrl6: ", srcUrl)
         return srcUrl
       }
     }
     if (asset.url.startsWith("https://") && asset.url.includes("ipfs")) {
       const srcUrl = `${IPFS_ENDPOINT}/${asset.url.split("/ipfs/")[1]}${optimizer}`
-      // console.debug("srcUrl7: ", srcUrl)
+      console.debug("srcUrl7: ", srcUrl)
       return srcUrl
     }
     if (asset.url.startsWith("ipfs://")) {
       const srcUrl = `${IPFS_ENDPOINT}/${asset.url.slice(7)}${optimizer}`
-      // console.debug("srcUrl8: ", srcUrl)
+      console.debug("srcUrl8: ", srcUrl)
       return srcUrl
     }
     const srcUrl = asset.url
-    // console.debug("srcUrl9: ", srcUrl)
+    console.debug("srcUrl9: ", srcUrl)
     return srcUrl
   } catch (error) {
     console.error("Error fetching IPFS data: ", error)
@@ -142,3 +196,28 @@ export async function getARC19AssetData(url: string, reserve: string) {
     throw new Error("invalid url" + url)
   }
 }
+
+// export function displayAssetAmount(asset: BonfireAssetData) {
+//   try {
+//     return formatBigIntWithDecimals(asset.amount, asset.decimals)
+//   } catch (e) {
+//     return "0"
+//   }
+// }
+
+// export function makeBigIntAmount(decimal_amount: number, asset: BonfireAssetData): bigint {
+//   const bigIntAmount = BigInt(decimal_amount * Math.pow(10, asset.decimals))
+//   return bigIntAmount
+// }
+
+// export function makeIntegerAmount(decimal_amount: number, asset: BonfireAssetData): number {
+//   const intAmount = decimal_amount * Math.pow(10, asset.decimals)
+//   return intAmount
+// }
+
+// // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+// export function numberWithCommas(num: number | string): string {
+//   const num_parts = num.toString().split(".")
+//   num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+//   return num_parts.join(".")
+// }
